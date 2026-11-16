@@ -5,31 +5,115 @@
   const NS='http://www.w3.org/2000/svg';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 
-  // One static bitmap per illustration; no per-dot DOM, animation or scroll redraw.
-  const bitmapCache=new Map();
-  function field(el,fn){
+  // Dot data is computed once per illustration and kept in typed arrays (no per-dot DOM).
+  // Motion: a one-off row-by-row reveal (~0.7s) that repaints only the rows still growing,
+  // plus a slow scan-light on the hero art that repaints only the columns under the beam,
+  // runs at ~30fps, and pauses off-screen / in background tabs / with reduced motion.
+  const motionQuery=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):null;
+  const calm=()=>!!motionQuery?.matches;
+  const dataCache=new Map();
+  function compute(el,fn){
     const cssW=el.clientWidth,cssH=el.clientHeight;
     const scale=Math.min(1,720/cssW,800/cssH);
     const W=Math.max(1,Math.round(cssW*scale)),H=Math.max(1,Math.round(cssH*scale));
     const s=Math.max(6,Math.min(20,Math.round(+(el.dataset.step||8)*scale)));
     const fg=el.dataset.fg||'#0B0B0B',red=el.dataset.red||'#D71921',ghost=el.dataset.ghost;
     const key=JSON.stringify([W,H,s,el.dataset]);
-    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-    canvas.setAttribute('aria-hidden','true');canvas.dataset.inseArt='true';
-    const ctx=canvas.getContext('2d');if(!ctx)return;
-    const cached=bitmapCache.get(key);
-    if(cached){ctx.drawImage(cached,0,0);el.replaceChildren(canvas);return;}
-    const paths=[new Path2D(),new Path2D(),new Path2D()];
+    const hit=dataCache.get(key);
+    if(hit){dataCache.delete(key);dataCache.set(key,hit);return hit;}
+    const xs=[],ys=[],rs=[],cs=[],rowStart=[0],rowY=[];
     for(let y=s/2;y<H;y+=s){for(let x=s/2;x<W;x+=s){
       const result=fn(x/W,y/H,x,y,W,H);let v=result,color=0;
       if(typeof result==='object'&&result){v=result.v;color=result.red?1:0;}
       let radius=0;if(v>.05)radius=s*.46*clamp(v);else if(ghost){radius=s*.08;color=2;}
-      if(radius){paths[color].moveTo(x+radius,y);paths[color].arc(x,y,radius,0,Math.PI*2);}
-    }}
-    [fg,red,ghost].forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
-    bitmapCache.set(key,canvas);
-    if(bitmapCache.size>8)bitmapCache.delete(bitmapCache.keys().next().value);
+      if(radius){xs.push(x);ys.push(y);rs.push(radius);cs.push(color);}
+    }rowStart.push(xs.length);rowY.push(y);}
+    const d={W,H,s,colors:[fg,red,ghost],xs:Float32Array.from(xs),ys:Float32Array.from(ys),rs:Float32Array.from(rs),cs:Uint8Array.from(cs),rowStart:Int32Array.from(rowStart),rowY:Float32Array.from(rowY),bitmap:null};
+    dataCache.set(key,d);
+    if(dataCache.size>10)dataCache.delete(dataCache.keys().next().value);
+    return d;
+  }
+  // Fill dots [i0,i1) as three batched paths; radiusOf may return 0 to skip.
+  function paint(ctx,d,i0,i1,k,filter){
+    const paths=[new Path2D(),new Path2D(),new Path2D()],max=d.s*.5;
+    for(let i=i0;i<i1;i++){
+      if(filter&&!filter(i))continue;
+      const r=Math.min(max,d.rs[i]*k);if(r<.3)continue;
+      const p=paths[d.cs[i]];p.moveTo(d.xs[i]+r,d.ys[i]);p.arc(d.xs[i],d.ys[i],r,0,Math.PI*2);
+    }
+    d.colors.forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
+  }
+  function bitmapOf(d){
+    if(!d.bitmap){const c=document.createElement('canvas');c.width=d.W;c.height=d.H;const x=c.getContext('2d');if(x)paint(x,d,0,d.xs.length,1);d.bitmap=c;}
+    return d.bitmap;
+  }
+
+  // ---------- shared animation loop ----------
+  const reveals=new Set(),scans=new Set();let raf=0,lastScan=0;
+  const ROW_MS=240,SPREAD_MS=460,SWEEP_MS=5200,REST_MS=3800,SCAN_FPS=30;
+  const outBack=p=>{const c=.9,q=p-1;return 1+(c+1)*q*q*q+c*q*q;};
+  function loop(){if(!raf)raf=requestAnimationFrame(frame);}
+  function frame(now){
+    raf=0;
+    for(const a of reveals){
+      if(!a.canvas.isConnected){reveals.delete(a);continue;}
+      const {d,ctx}=a,rows=d.rowY.length,t=now-a.t0;let done=true;
+      for(let r=a.from;r<rows;r++){
+        const p=(t-(rows>1?r/(rows-1):0)*SPREAD_MS)/ROW_MS;
+        if(p<=0){done=false;break;}
+        ctx.clearRect(0,d.rowY[r]-d.s/2,d.W,d.s);
+        if(p>=1){paint(ctx,d,d.rowStart[r],d.rowStart[r+1],1);if(r===a.from)a.from++;continue;}
+        done=false;paint(ctx,d,d.rowStart[r],d.rowStart[r+1],outBack(p));
+      }
+      if(done){reveals.delete(a);ctx.clearRect(0,0,d.W,d.H);ctx.drawImage(bitmapOf(d),0,0);if(a.after)a.after();}
+    }
+    let scanning=false;
+    if(scans.size&&now-lastScan>=1000/SCAN_FPS-2){lastScan=now;for(const sc of scans)if(stepScan(sc,now))scanning=true;}
+    else for(const sc of scans)if(sc.visible&&!sc.revealing)scanning=true;
+    if(reveals.size||scanning)loop();
+  }
+  // Beam travels left→right; only the cells under the previous and current beam are repainted.
+  function stepScan(sc,now){
+    if(!sc.canvas.isConnected){scans.delete(sc);scanObserver?.unobserve(sc.canvas);return false;}
+    if(!sc.visible||sc.revealing||document.hidden)return false;
+    const {d,ctx}=sc,band=Math.max(d.s*4,d.W*.09),cycle=SWEEP_MS+REST_MS;
+    const t=(now-sc.t0)%cycle,bx=t<SWEEP_MS?-band+(d.W+band*2)*(t/SWEEP_MS):null;
+    const lo=bx===null?Infinity:bx-band,hi=bx===null?-Infinity:bx+band;
+    const x0=Math.min(lo,sc.lo),x1=Math.max(hi,sc.hi);sc.lo=lo;sc.hi=hi;
+    if(x1<=x0)return true;
+    const c0=Math.max(0,Math.floor(x0/d.s)*d.s),c1=Math.min(d.W,Math.ceil(x1/d.s)*d.s);
+    ctx.clearRect(c0,0,c1-c0,d.H);
+    const inCells=i=>d.xs[i]>=c0&&d.xs[i]<c1;
+    const glow=i=>{if(bx===null)return 0;const g=1-Math.abs(d.xs[i]-bx)/band;return g>0?g*g*(3-2*g):0;};
+    // body dots swell under the beam; faint grid dots light up in the foreground colour
+    const paths=[new Path2D(),new Path2D(),new Path2D()],lit=new Path2D(),max=d.s*.5;
+    for(let i=0;i<d.xs.length;i++){
+      if(!inCells(i))continue;const g=glow(i),c=d.cs[i],x=d.xs[i],y=d.ys[i];
+      if(c===2&&g>.02){const r=d.s*(.08+.13*g);lit.moveTo(x+r,y);lit.arc(x,y,r,0,Math.PI*2);continue;}
+      const r=Math.min(max,d.rs[i]*(1+.42*g));if(r<.3)continue;
+      paths[c].moveTo(x+r,y);paths[c].arc(x,y,r,0,Math.PI*2);
+    }
+    d.colors.forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
+    ctx.save();ctx.globalAlpha=.28;ctx.fillStyle=d.colors[0];ctx.fill(lit);ctx.restore();
+    return true;
+  }
+  const scanObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
+    for(const e of entries){const sc=e.target.__scan;if(sc){sc.visible=e.isIntersecting;if(sc.visible)loop();}}
+  }):null;
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&scans.size)loop();});
+
+  function field(el,fn){
+    const d=compute(el,fn);
+    const canvas=document.createElement('canvas');canvas.width=d.W;canvas.height=d.H;
+    canvas.setAttribute('aria-hidden','true');canvas.dataset.inseArt='true';
+    const ctx=canvas.getContext('2d');if(!ctx)return;
     el.replaceChildren(canvas);
+    const ambient=!!el.closest('.hero-art,.ah')&&!!scanObserver;
+    const sc=ambient&&!calm()?{canvas,ctx,d,visible:true,revealing:true,t0:0,lo:Infinity,hi:-Infinity}:null;
+    const startScan=()=>{if(!sc)return;sc.revealing=false;sc.t0=performance.now()-SWEEP_MS*.08;loop();};
+    if(sc){canvas.__scan=sc;scans.add(sc);scanObserver.observe(canvas);}
+    if(calm()){ctx.drawImage(bitmapOf(d),0,0);return;}
+    reveals.add({canvas,ctx,d,t0:performance.now(),from:0,after:startScan});loop();
   }
 
   // ---------- stacked iso slabs ----------
@@ -176,6 +260,24 @@
       if(!visibleObserver||(rect.bottom>=0&&rect.top<=innerHeight))draw(el);
       else if(!waiting.has(el)){waiting.add(el);visibleObserver.observe(el);}
     }
+    countUp(root);
+  }
+  // One-off count-up for small Doto numbers (01, 12, …) that are on screen; keeps zero padding.
+  function countUp(root){
+    if(calm()||!root.querySelectorAll)return;
+    const items=[];
+    for(const el of root.querySelectorAll('.dot:not([data-counted])')){
+      const node=el.firstChild;if(!node||node.nodeType!==3)continue;
+      const text=node.nodeValue.trim();if(!/^\d{1,3}$/.test(text)||+text<2)continue;
+      el.dataset.counted='';const rect=el.getBoundingClientRect();
+      if(rect.bottom<0||rect.top>innerHeight||!rect.width)continue;
+      items.push({node,end:+text,width:text.length,lead:node.nodeValue.match(/^\s*/)[0]});
+    }
+    if(!items.length)return;const t0=performance.now(),dur=620;
+    const tick=now=>{const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);
+      for(const it of items)if(it.node.isConnected)it.node.nodeValue=it.lead+String(Math.round(it.end*e)).padStart(it.width,'0');
+      if(p<1)requestAnimationFrame(tick);};
+    tick(t0);requestAnimationFrame(tick);
   }
   window.InSeArt=Object.freeze({render,types:Object.freeze(Object.keys(MAP))});window.renderArt=render;
   if(document.readyState!=='loading')render();else document.addEventListener('DOMContentLoaded',()=>render(),{once:true});
