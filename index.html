@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="面向应用物理本科生的 InSe 薄片生长科研追踪站。追踪气相沉积、结构与缺陷，以及空间微重力与地面制造的证据。">
+  <title>InSe 薄片生长研究动态</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body data-view="overview">
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="topbar">
+    <button class="icon-button menu-button" id="menuToggle" aria-label="打开导航" aria-expanded="false" aria-controls="sidebar"><span data-icon="menu"></span></button>
+    <a class="brand" href="?view=overview" data-view="overview" aria-label="InSe Observatory 首页"><span id="brandWordmark" aria-hidden="true">INSE</span><span class="brand-caption">( RESEARCH )</span></a>
+    <div class="topbar-actions"><button class="icon-button" data-view="favorites" aria-label="打开我的收藏"><span data-icon="bookmark"></span></button><button class="icon-button" data-view="archive" aria-label="查看更新记录"><span data-icon="clock"></span></button></div>
+  </header>
+  <aside class="sidebar" id="sidebar" aria-label="网站导航">
+    <div class="menu-intro"><span class="mono-label">INSE / RESEARCH OBSERVATORY</span><button class="icon-button" data-action="menu-close" aria-label="关闭导航"><span data-icon="close"></span></button></div>
+    <nav id="navigation">
+      <button data-view="overview" class="nav-button active"><span>01</span>动态总览<span data-icon="arrow"></span></button>
+      <button data-view="library" class="nav-button"><span>02</span>论文库 <b id="navCount">—</b><span data-icon="arrow"></span></button>
+      <button data-view="reading" class="nav-button"><span>03</span>值得精读<span data-icon="arrow"></span></button>
+      <button data-view="favorites" class="nav-button"><span>04</span>我的收藏 <b id="favoriteCount">0</b><span data-icon="arrow"></span></button>
+      <button data-view="archive" class="nav-button"><span>05</span>更新档案<span data-icon="arrow"></span></button>
+      <button data-view="about" class="nav-button"><span>06</span>追踪说明<span data-icon="arrow"></span></button>
+    </nav>
+    <div class="sidebar-bottom"><span class="mono-label">FROM THE FIRST LAYER.</span><p>生长 · 结构 · 缺陷 · 微重力</p><small>由原始文献出发，保留证据边界。</small></div>
+  </aside>
+  <div class="mobile-shade" id="mobileShade"></div>
+  <div class="page-shell">
+    <main id="main" tabindex="-1">
+      <section class="page-heading">
+        <div class="breadcrumb">研究追踪 <span>/</span> <strong id="breadcrumbCurrent">动态总览</strong></div>
+        <div class="page-heading-row"><div><p class="eyebrow">INSE GROWTH INTELLIGENCE</p><h1 id="pageTitle">InSe 薄片生长研究动态<span class="heading-dot">.</span></h1><p class="page-subtitle" id="pageSubtitle">从生长条件到物理机制，为下一次实验积累证据。</p></div><button class="button secondary export-button" id="exportButton"><span data-icon="download"></span>导出文献</button></div>
+      </section>
+      <div id="mainContent"><div class="loading-state" aria-live="polite"><span class="loading-dot"></span><p class="mono-label">LOADING RESEARCH RECORDS</p><p>正在载入已核查文献…</p></div></div>
+      <footer class="page-footer">
+        <div class="footer-main"><a class="footer-brand" data-view="overview" href="?view=overview">INSE<br><span>( RESEARCH )</span></a><div class="footer-note"><p>从一层晶体，读懂生长的物理。</p><span>INSE GROWTH RESEARCH OBSERVATORY</span></div><div class="footer-links"><button class="text-button" data-view="library">论文库</button><button class="text-button" data-view="archive">更新档案</button><button class="text-button" data-view="about">数据与证据说明</button></div></div>
+        <div class="footer-bottom"><span id="updatedAt">正在载入文献</span><span id="syncStatus">收藏保存在本设备</span><span>FOR APPLIED PHYSICS STUDENTS</span></div>
+      </footer>
+    </main>
+  </div>
+  <div class="compare-tray" id="compareTray" hidden><div><strong>论文对比 <span id="compareCount">0</span>/3</strong><span id="compareNames"></span></div><div><button class="text-button" id="clearCompare">清空</button><button class="button primary" id="openCompare">开始对比 <span data-icon="arrow"></span></button></div></div>
+  <dialog class="paper-dialog" id="paperDialog" aria-labelledby="paperDialogTitle"><div id="paperDialogContent"></div></dialog>
+  <dialog class="compare-dialog" id="compareDialog" aria-labelledby="compareDialogTitle"><div id="compareDialogContent"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
