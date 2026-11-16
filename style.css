@@ -764,3 +764,144 @@ html{scroll-behavior:auto}
 @keyframes view-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 #mainContent>*{animation:view-in .32s cubic-bezier(.2,.7,.2,1) backwards}
 @media (prefers-reduced-motion:reduce){#mainContent>*{animation:none}}
+/* ===================================================================
+   Nothing-style refinement + dot motion (2026-11-16)
+   Light grey ground, sparse page dot grid, floating bar, regular-weight
+   headings, 10px tiles, small mono labels; filler mega-numerals removed.
+   =================================================================== */
+:root{--paper:#F4F4F4;--g1:#E6E6E4;--g2:#DCDCDA;--r-card:10px;--r-tile:10px}
+html{background:var(--paper)}
+html body{background:transparent}
+canvas.bg-grid{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+/* generic size for inline 24px icons that had no contextual rule (fixes the giant archive arrow) */
+:where(svg[viewBox="0 0 24 24"]){width:1.1em;height:1.1em;flex:none;vertical-align:-.15em}
+
+/* ---------- floating header bar ---------- */
+html body>.hdr{position:sticky;top:0;margin-bottom:-76px;background:none;color:var(--ink);pointer-events:none;isolation:isolate}
+html body>.hdr>*{pointer-events:auto}
+html body>.hdr::before{content:"";position:absolute;z-index:-1;top:10px;bottom:10px;left:max(8px,calc(var(--pad) - 20px));right:max(8px,calc(var(--pad) - 20px));border-radius:10px;background:rgba(220,221,221,.94)}
+html body[data-view]>.hdr nav button,html body>.hdr nav a{color:#5c5c5c}
+html body[data-view]>.hdr nav button.on,html body[data-view]>.hdr nav button.active,html body>.hdr nav a.on{color:var(--ink)}
+html body[data-view]>.hdr .ibtn{border-color:transparent;color:var(--ink)}
+html body[data-view]>.hdr .ibtn:hover{background:rgba(0,0,0,.06)}
+html body[data-view]>.hdr .export-button{background:var(--ink);color:#fff}
+html body>.hdr .logo .mono{color:#6b6b6b}
+#main{padding-top:76px}
+body[data-view="overview"] #main,body[data-view="reading"] #main,body[data-view="about"] #main{background:linear-gradient(#000 0 77px,transparent 77px)}
+
+/* dot wordmark (real circles, animated per dot) */
+.hdr .logo.has-dm{position:relative;align-items:center}
+.hdr .logo.has-dm>.dot{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hdr .logo .dm{display:block;height:19px;width:auto;overflow:visible}
+.dm circle{transform-box:fill-box;transform-origin:center;animation:dm-pop .52s cubic-bezier(.3,1.7,.5,1) backwards;animation-delay:calc(var(--c)*20ms + var(--r)*16ms + 100ms)}
+.dm.ripple circle{animation:dm-wave .46s ease-out;animation-delay:calc(var(--c)*13ms + var(--r)*6ms)}
+@keyframes dm-pop{from{transform:scale(0)}}
+@keyframes dm-wave{40%{transform:scale(1.55)}}
+
+/* ---------- type: regular weight, calmer sizes ---------- */
+html body .display{font-weight:400;letter-spacing:-.02em}
+html body .h1{font-size:clamp(40px,4.4vw,60px)}
+html body .h2{font-size:clamp(32px,3.2vw,44px);line-height:1.15}
+html body .h3{font-size:clamp(24px,2.2vw,30px)}
+html body .lead{font-weight:400;font-size:16px}
+html body .view-overview .hero-l .display{font-size:clamp(40px,4.6vw,64px);margin:28px 0 24px}
+html body .phead .display{font-size:clamp(40px,4.6vw,60px);margin:26px 0 14px}
+html body .view-reading .rh .display{font-size:clamp(40px,4.6vw,60px)}
+html body .view-about .ah .display{font-size:clamp(40px,4.6vw,60px)}
+html body .ftr h3.display{font-size:clamp(24px,2.4vw,32px)}
+
+/* ---------- filler mega numerals: removed or reduced to labels ---------- */
+html body .ftr .big{display:none}
+html body .ftr{margin:0 8px 8px;border-radius:12px;padding-top:72px}
+html body .ftr .bot{margin-top:56px}
+html body .view-reading .fx-art .num{display:none}
+html body .ph .count .dot,html body .phead .ph .count .dot,html body .view-library .ph .count .dot{font-size:clamp(28px,3vw,40px);line-height:1}
+html body .view-overview .issue-no .dot{font-size:clamp(40px,4.4vw,64px);line-height:1;margin:14px 0 10px}
+html body .view-reading .rh .issue .dot{font-size:clamp(36px,4vw,56px);line-height:1}
+html body .view-archive .timeline .rail>.no,html body .view-archive .time-row>.no,html body .view-archive .node .no{font-size:clamp(30px,3vw,42px);line-height:1}
+html body .view-favorites .panel .dot{font-size:48px}
+html body .view-favorites .empty .dot,html body .view-library .results .empty .dot,html body .view-reading>.empty .dot{font-size:56px}
+html body .view-overview .stat .dot{font-size:clamp(30px,3.2vw,44px)}
+html body .view-overview .stat .dot.date{font-size:clamp(30px,3.2vw,44px)}
+html body .view-overview .tp .foot .dot{font-size:22px;color:var(--g4)}
+html body .view-overview .ft .metric .dot{font-size:clamp(30px,3vw,40px)}
+html body #compareDialog .compare-head>div:first-child>.dot{font-size:36px}
+
+/* ---------- controls: squarer, Nothing-like ---------- */
+html body .btn{border-radius:8px;font-size:13px;height:44px;padding:0 20px}
+html body .btn.sm{height:36px;padding:0 14px;border-radius:7px}
+html body .chip{border-radius:6px}
+html body .ibtn{border-radius:8px}
+.link{border-bottom-width:1px}
+
+/* ---------- tiles: flat 10px, black/white flip on hover or selection ---------- */
+html body .tile{border-radius:10px;transition:background-color .34s cubic-bezier(.2,.7,.2,1),color .34s}
+html body .tile.is-inv{background:#0F0F10;color:#fff}
+html body .tile.blk.is-inv{background:var(--g1);color:var(--ink)}
+html body .tile.is-inv .small,html body .tile.is-inv .mono{color:#9a9a9e}
+html body .tile.blk.is-inv .small,html body .tile.blk.is-inv .mono{color:var(--g4)}
+html body .tile.is-inv .chip{border-color:#3a3a3d;color:#d6d6d6}
+html body .tile.blk.is-inv .chip{border-color:var(--g2);color:var(--g4)}
+html body .view-overview .tp:hover{outline:0}
+html body .view-overview .tp.tile.is-inv .h4,html body .view-overview .tp.tile.is-inv .foot .dot{color:#fff}
+html body .view-overview .ft.tile.is-inv{color:#fff}
+html body .view-overview .ft.tile.blk.is-inv{color:var(--ink)}
+html body .view-overview .ft.tile.is-inv .paper-title-button{color:inherit}
+html body .paper-card{border-radius:10px;transition:box-shadow .3s}
+html body .paper-card.is-hot{box-shadow:0 0 0 1px var(--ink)}
+html body .paper-card .thumb{border-radius:8px}
+
+/* ---------- dark bands sit inset like Nothing's blocks ---------- */
+html body .band.dark{margin-left:8px;margin-right:8px;border-radius:12px}
+
+/* ---------- blocks rise in once ---------- */
+.rv{opacity:0;transform:translateY(18px)}
+.rv.in{opacity:1;transform:none;transition:opacity .6s ease var(--rv-d,0s),transform .75s cubic-bezier(.2,.7,.2,1) var(--rv-d,0s)}
+
+@media (max-width:760px){
+  html body>.hdr::before{left:8px;right:8px;top:8px;bottom:8px}
+  html body>.hdr{margin-bottom:-64px}
+  #main{padding-top:64px}
+  body[data-view="overview"] #main,body[data-view="reading"] #main,body[data-view="about"] #main{background:linear-gradient(#000 0 65px,transparent 65px)}
+  html body .ftr{margin:0 6px 6px}
+  html body .band.dark{margin-left:6px;margin-right:6px}
+}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}.dm circle,.dm.ripple circle{animation:none}html body .tile{transition:none}}
+/* header colours must beat the old dark-header rules */
+html body>.hdr,html body>.hdr.dark{background:none!important;color:var(--ink)!important}
+html body>.hdr nav a,html body>.hdr nav button{color:#5c5c5c!important}
+html body>.hdr nav a.on,html body>.hdr nav button.on,html body>.hdr nav button.active{color:var(--ink)!important}
+html body>.hdr .ibtn{border-color:transparent!important;color:var(--ink)!important}
+html body>.hdr .export-button{background:var(--ink)!important;color:#fff!important}
+/* feature cards: picture on top, caption below (no text over dots) */
+html body .view-overview .ft{height:auto;padding:0;justify-content:flex-start;position:relative}
+html body .view-overview .ft .art{position:relative;inset:auto;bottom:auto;height:clamp(240px,25vw,340px)}
+html body .view-overview .ft>.content:nth-child(2){position:absolute;top:0;left:0;right:0;padding:22px 26px}
+html body .view-overview .ft>.content:nth-child(3){padding:6px 26px 28px}
+html body .view-overview .ft h3{font-size:clamp(22px,2vw,28px);font-weight:400;margin:14px 0 10px}
+html body .view-overview .feature-metric{margin:18px 0 22px}
+html body .view-overview .feature-metric .metric-value{font-size:clamp(28px,2.6vw,36px)}
+html body .view-overview .sec{padding-top:104px;padding-bottom:104px}
+@media (max-width:760px){html body .view-overview .sec{padding-top:64px;padding-bottom:64px}html body .view-overview .ft .art{height:220px}}
+@media (min-width:761px){
+  html body .view-about .ah .in{width:min(44%,560px)}
+  html body .view-about .ah .art{width:min(46%,600px);right:var(--pad)}
+}
+html body .view-about .ah .lead,html body .view-reading .rh .lead{margin-top:18px}
+html body .view-reading .fx-body h2{font-weight:400;font-size:clamp(26px,2.5vw,34px);letter-spacing:-.02em}
+html body .view-archive .issue h2{font-weight:400;font-size:clamp(24px,2.3vw,32px)}
+html body .library-search{border-radius:10px}
+html body .library-search .btn{border-radius:7px}
+html body .view-about .ah>.art>.art{position:absolute;inset:0;width:100%;height:100%;top:0;right:0}
+@media (max-width:760px){
+  html body .h2,html body .display.h2,html body .sechead .h2{font-size:30px}
+  html body .view-overview .hero-l .display,html body .phead .display,html body .view-reading .rh .display,html body .view-about .ah .display{font-size:38px}
+  html body .view-overview .ft h3,html body .view-reading .fx-body h2,html body .view-archive .issue h2{font-size:24px}
+}
+html body .ftr,html body .band.dark{width:auto;max-width:none}
+html body .view-about .about-copy,html body .view-about .sblk{min-width:0;overflow-wrap:anywhere}
+/* inverted tiles must win over per-view tile colours */
+html body .tile.is-inv:not(.blk){background:#0F0F10!important;color:#fff}
+html body .tile.blk.is-inv{background:var(--g1)!important;color:var(--ink)}
+html body .view-library .pc .thumb{border-radius:8px}
+html body .paper-dialog .in h1{font-weight:400;font-size:clamp(28px,3vw,40px);letter-spacing:-.02em}

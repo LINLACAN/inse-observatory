@@ -1,121 +1,205 @@
 /* InSe art adapted from the supplied Opus design template. */
-// Dot-matrix / halftone art generator for InSe mockups.
-// Usage: <div data-art="slabs" data-fg="#fff" data-step="9" style="width:..;height:.."></div>
+// Dot-matrix art + motion layer.
+// Every illustration is ONE canvas; dot geometry lives in typed arrays (never in the DOM).
+// Per-dot motion is drawn on that canvas only while something moves, then the loop sleeps.
 (function(){
-  const NS='http://www.w3.org/2000/svg';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+  const mq=q=>window.matchMedia?matchMedia(q):{matches:false};
+  const motionQuery=mq('(prefers-reduced-motion: reduce)');
+  const calm=()=>!!motionQuery.matches;
+  const fine=()=>mq('(hover:hover) and (pointer:fine)').matches;
+  const hash=i=>{const x=Math.sin(i*12.9898+78.233)*43758.5453;return x-Math.floor(x);};
+  const outBack=p=>{const c=1.15,q=p-1;return 1+(c+1)*q*q*q+c*q*q;};
+  const inQuad=p=>p*p;
+  const hasIO=typeof IntersectionObserver==='function';
 
-  // Dot data is computed once per illustration and kept in typed arrays (no per-dot DOM).
-  // Motion: a one-off row-by-row reveal (~0.7s) that repaints only the rows still growing,
-  // plus a slow scan-light on the hero art that repaints only the columns under the beam,
-  // runs at ~30fps, and pauses off-screen / in background tabs / with reduced motion.
-  const motionQuery=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):null;
-  const calm=()=>!!motionQuery?.matches;
+  // ---------- geometry (cached per size + dataset) ----------
   const dataCache=new Map();
   function compute(el,fn){
     const cssW=el.clientWidth,cssH=el.clientHeight;
     const scale=Math.min(1,720/cssW,800/cssH);
     const W=Math.max(1,Math.round(cssW*scale)),H=Math.max(1,Math.round(cssH*scale));
     const s=Math.max(6,Math.min(20,Math.round(+(el.dataset.step||8)*scale)));
-    const fg=el.dataset.fg||'#0B0B0B',red=el.dataset.red||'#D71921',ghost=el.dataset.ghost;
+    const ghost=el.dataset.ghost;
     const key=JSON.stringify([W,H,s,el.dataset]);
     const hit=dataCache.get(key);
     if(hit){dataCache.delete(key);dataCache.set(key,hit);return hit;}
-    const xs=[],ys=[],rs=[],cs=[],rowStart=[0],rowY=[];
+    const xs=[],ys=[],rs=[],cs=[],rowStart=[0];
     for(let y=s/2;y<H;y+=s){for(let x=s/2;x<W;x+=s){
       const result=fn(x/W,y/H,x,y,W,H);let v=result,color=0;
       if(typeof result==='object'&&result){v=result.v;color=result.red?1:0;}
       let radius=0;if(v>.05)radius=s*.46*clamp(v);else if(ghost){radius=s*.08;color=2;}
       if(radius){xs.push(x);ys.push(y);rs.push(radius);cs.push(color);}
-    }rowStart.push(xs.length);rowY.push(y);}
-    const d={W,H,s,colors:[fg,red,ghost],xs:Float32Array.from(xs),ys:Float32Array.from(ys),rs:Float32Array.from(rs),cs:Uint8Array.from(cs),rowStart:Int32Array.from(rowStart),rowY:Float32Array.from(rowY),bitmap:null};
+    }rowStart.push(xs.length);}
+    const n=xs.length,jit=new Float32Array(n);for(let i=0;i<n;i++)jit[i]=hash(i);
+    const d={W,H,s,n,xs:Float32Array.from(xs),ys:Float32Array.from(ys),rs:Float32Array.from(rs),cs:Uint8Array.from(cs),rowStart:Int32Array.from(rowStart),jit};
     dataCache.set(key,d);
-    if(dataCache.size>10)dataCache.delete(dataCache.keys().next().value);
+    if(dataCache.size>14)dataCache.delete(dataCache.keys().next().value);
     return d;
   }
-  // Fill dots [i0,i1) as three batched paths; radiusOf may return 0 to skip.
-  function paint(ctx,d,i0,i1,k,filter){
-    const paths=[new Path2D(),new Path2D(),new Path2D()],max=d.s*.5;
-    for(let i=i0;i<i1;i++){
-      if(filter&&!filter(i))continue;
-      const r=Math.min(max,d.rs[i]*k);if(r<.3)continue;
-      const p=paths[d.cs[i]];p.moveTo(d.xs[i]+r,d.ys[i]);p.arc(d.xs[i],d.ys[i],r,0,Math.PI*2);
-    }
-    d.colors.forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
-  }
-  function bitmapOf(d){
-    if(!d.bitmap){const c=document.createElement('canvas');c.width=d.W;c.height=d.H;const x=c.getContext('2d');if(x)paint(x,d,0,d.xs.length,1);d.bitmap=c;}
-    return d.bitmap;
+  // normal palette + its black/white inversion (red accent is kept)
+  function palettes(el){
+    const fg=el.dataset.fg||'#0B0B0B',red=el.dataset.red||'#D71921',ghost=el.dataset.ghost||'';
+    const light=/^#f/i.test(fg);
+    return [[fg,red,ghost],light?['#0B0B0B',red,ghost?'#cfcfcb':'']:['#FFFFFF',red,ghost?'#26262a':'']];
   }
 
-  // ---------- shared animation loop ----------
-  const reveals=new Set(),scans=new Set();let raf=0,lastScan=0;
-  const ROW_MS=240,SPREAD_MS=460,SWEEP_MS=5200,REST_MS=3800,SCAN_FPS=30;
-  const outBack=p=>{const c=.9,q=p-1;return 1+(c+1)*q*q*q+c*q*q;};
-  function loop(){if(!raf)raf=requestAnimationFrame(frame);}
-  function frame(now){
-    raf=0;
-    for(const a of reveals){
-      if(!a.canvas.isConnected){reveals.delete(a);continue;}
-      const {d,ctx}=a,rows=d.rowY.length,t=now-a.t0;let done=true;
-      for(let r=a.from;r<rows;r++){
-        const p=(t-(rows>1?r/(rows-1):0)*SPREAD_MS)/ROW_MS;
-        if(p<=0){done=false;break;}
-        ctx.clearRect(0,d.rowY[r]-d.s/2,d.W,d.s);
-        if(p>=1){paint(ctx,d,d.rowStart[r],d.rowStart[r+1],1);if(r===a.from)a.from++;continue;}
-        done=false;paint(ctx,d,d.rowStart[r],d.rowStart[r+1],outBack(p));
+  // ---------- drawing ----------
+  const arts=new Set();
+  const art=new WeakMap();
+  // boost from hero effects (scan beam + cursor lens); 0 when idle
+  function boost(S,i){
+    const f=S.fx;if(!f)return 0;const d=S.d;let g=0;
+    if(f.bx!==null){const a=1-Math.abs(d.xs[i]-f.bx)/f.band;if(a>0)g+=a*a*(3-2*a)*.4;}
+    if(f.px!==null){const dx=d.xs[i]-f.px,dy=d.ys[i]-f.py,q=1-(dx*dx+dy*dy)/(f.lr*f.lr);if(q>0)g+=q*q*1.05;}
+    return g;
+  }
+  // Draw dots in rows [r0,r1) with x in [x0,x1). Returns true while any dot is still animating.
+  function paint(S,t,x0,x1,r0,r1){
+    const {d,ctx,anim}=S,max=d.s*.5,P=[null,null,null,null,null,null,null];
+    const path=k=>P[k]||(P[k]=new Path2D());
+    let busy=false;
+    for(let r=r0;r<r1;r++){for(let i=d.rowStart[r],e=d.rowStart[r+1];i<e;i++){
+      const x=d.xs[i];if(x<x0||x>=x1)continue;
+      let k=1,pal=S.inv;
+      if(anim){
+        const p=(t-anim.delay[i])/anim.dur;
+        if(anim.type==='reveal'){if(p<=0){busy=true;continue;}if(p<1){busy=true;k=outBack(p);}}
+        else if(p<1){busy=true;if(p<=0)pal=anim.from;else if(p<.5){pal=anim.from;k=1-inQuad(p*2);}else{pal=anim.to;k=outBack(p*2-1);}}
       }
-      if(done){reveals.delete(a);ctx.clearRect(0,0,d.W,d.H);ctx.drawImage(bitmapOf(d),0,0);if(a.after)a.after();}
-    }
-    let scanning=false;
-    if(scans.size&&now-lastScan>=1000/SCAN_FPS-2){lastScan=now;for(const sc of scans)if(stepScan(sc,now))scanning=true;}
-    else for(const sc of scans)if(sc.visible&&!sc.revealing)scanning=true;
-    if(reveals.size||scanning)loop();
+      const c=d.cs[i],y=d.ys[i];let rad;
+      const g=S.fx?boost(S,i):0;
+      if(c===2&&g>.03){rad=d.s*(.08+.17*Math.min(1,g))*k;if(rad>.25){const q=path(6);q.moveTo(x+rad,y);q.arc(x,y,rad,0,6.2832);}continue;}
+      rad=Math.min(max,d.rs[i]*k*(1+g));if(rad<.25)continue;
+      const q=path(pal*3+c);q.moveTo(x+rad,y);q.arc(x,y,rad,0,6.2832);
+    }}
+    for(let k=0;k<6;k++){const col=S.pals[k/3|0][k%3];if(P[k]&&col){ctx.fillStyle=col;ctx.fill(P[k]);}}
+    if(P[6]){ctx.save();ctx.globalAlpha=.32;ctx.fillStyle=S.pals[S.inv][0];ctx.fill(P[6]);ctx.restore();}
+    return busy;
   }
-  // Beam travels left→right; only the cells under the previous and current beam are repainted.
-  function stepScan(sc,now){
-    if(!sc.canvas.isConnected){scans.delete(sc);scanObserver?.unobserve(sc.canvas);return false;}
-    if(!sc.visible||sc.revealing||document.hidden)return false;
-    const {d,ctx}=sc,band=Math.max(d.s*4,d.W*.09),cycle=SWEEP_MS+REST_MS;
-    const t=(now-sc.t0)%cycle,bx=t<SWEEP_MS?-band+(d.W+band*2)*(t/SWEEP_MS):null;
-    const lo=bx===null?Infinity:bx-band,hi=bx===null?-Infinity:bx+band;
-    const x0=Math.min(lo,sc.lo),x1=Math.max(hi,sc.hi);sc.lo=lo;sc.hi=hi;
-    if(x1<=x0)return true;
-    const c0=Math.max(0,Math.floor(x0/d.s)*d.s),c1=Math.min(d.W,Math.ceil(x1/d.s)*d.s);
-    ctx.clearRect(c0,0,c1-c0,d.H);
-    const inCells=i=>d.xs[i]>=c0&&d.xs[i]<c1;
-    const glow=i=>{if(bx===null)return 0;const g=1-Math.abs(d.xs[i]-bx)/band;return g>0?g*g*(3-2*g):0;};
-    // body dots swell under the beam; faint grid dots light up in the foreground colour
-    const paths=[new Path2D(),new Path2D(),new Path2D()],lit=new Path2D(),max=d.s*.5;
-    for(let i=0;i<d.xs.length;i++){
-      if(!inCells(i))continue;const g=glow(i),c=d.cs[i],x=d.xs[i],y=d.ys[i];
-      if(c===2&&g>.02){const r=d.s*(.08+.13*g);lit.moveTo(x+r,y);lit.arc(x,y,r,0,Math.PI*2);continue;}
-      const r=Math.min(max,d.rs[i]*(1+.42*g));if(r<.3)continue;
-      paths[c].moveTo(x+r,y);paths[c].arc(x,y,r,0,Math.PI*2);
-    }
-    d.colors.forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
-    ctx.save();ctx.globalAlpha=.28;ctx.fillStyle=d.colors[0];ctx.fill(lit);ctx.restore();
-    return true;
+  function paintAll(S,t){S.ctx.clearRect(0,0,S.d.W,S.d.H);return paint(S,t,-1,1e9,0,S.d.rowStart.length-1);}
+  function paintRect(S,x0,x1,y0,y1){
+    const d=S.d,s=d.s;x0=Math.max(0,Math.floor(x0/s)*s);x1=Math.min(d.W,Math.ceil(x1/s)*s);
+    const r0=Math.max(0,Math.floor(y0/s)),r1=Math.min(d.rowStart.length-1,Math.ceil(y1/s));
+    if(x1<=x0||r1<=r0)return;
+    S.ctx.clearRect(x0,r0*s,x1-x0,(r1-r0)*s);paint(S,0,x0,x1,r0,r1);
   }
-  const scanObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
-    for(const e of entries){const sc=e.target.__scan;if(sc){sc.visible=e.isIntersecting;if(sc.visible)loop();}}
-  }):null;
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&scans.size)loop();});
 
+  // ---------- one shared animation loop ----------
+  let raf=0,lastFx=0;
+  const loop=()=>{if(!raf)raf=requestAnimationFrame(frame);};
+  function frame(now){
+    raf=0;let again=false;const fxTick=now-lastFx>=31;if(fxTick)lastFx=now;
+    for(const S of arts){
+      if(!S.canvas.isConnected){drop(S);continue;}
+      if(S.anim){
+        if(paintAll(S,now-S.anim.t0))again=true;
+        else S.anim=null;
+        if(S.fx)again=true;
+        continue;
+      }
+      if(S.fx&&S.fx.visible&&!document.hidden){again=true;if(fxTick)stepFx(S,now);}
+    }
+    if(again)loop();
+  }
+  function drop(S){arts.delete(S);fxObserver?.unobserve(S.canvas);}
+  function start(S,type,opts={}){
+    if(calm()){if(type==='flip')S.inv=opts.to;S.anim=null;paintAll(S,0);return;}
+    const d=S.d,delay=new Float32Array(d.n);
+    if(type==='reveal'){
+      // dots pop one by one: a soft diagonal sweep broken up by per-dot jitter
+      const span=Math.min(620,220+d.n*.06);
+      for(let i=0;i<d.n;i++)delay[i]=((d.xs[i]/d.W)*.45+(d.ys[i]/d.H)*.55)*span+d.jit[i]*260;
+      S.anim={type,t0:performance.now(),dur:420,delay};
+    }else{
+      // black/white flip spreading from the pointer
+      const ox=opts.x??d.W/2,oy=opts.y??d.H/2,far=Math.hypot(Math.max(ox,d.W-ox),Math.max(oy,d.H-oy))||1;
+      for(let i=0;i<d.n;i++)delay[i]=Math.hypot(d.xs[i]-ox,d.ys[i]-oy)/far*330+d.jit[i]*70;
+      const from=S.anim&&S.anim.type==='flip'?S.anim.to:S.inv;
+      S.inv=opts.to;S.anim={type,t0:performance.now(),dur:300,delay,from,to:opts.to};
+    }
+    loop();
+  }
+
+  // ---------- hero effects: slow scan beam + cursor lens (repaint only the cells they touch) ----------
+  const SWEEP=4600,REST=6200;
+  function stepFx(S,now){
+    const f=S.fx,d=S.d,cyc=SWEEP+REST,t=(now-f.t0)%cyc;
+    const bx=t<SWEEP?-f.band+(d.W+f.band*2)*(t/SWEEP):null;
+    const px=f.tx,py=f.ty;
+    const ob=f.bx,ox=f.px,oy=f.py;
+    if(bx===ob&&px===ox&&py===oy)return;
+    f.bx=bx;f.px=px;f.py=py;
+    const lr=f.lr*1.05;
+    if(ob!==null||bx!==null){
+      const a=[ob,bx].filter(v=>v!==null);paintRect(S,Math.min(...a)-f.band,Math.max(...a)+f.band,0,d.H);
+    }
+    if(ox!==null||px!==null){
+      const xs=[ox,px].filter(v=>v!==null),ys=[oy,py].filter(v=>v!==null);
+      paintRect(S,Math.min(...xs)-lr,Math.max(...xs)+lr,Math.min(...ys)-lr,Math.max(...ys)+lr);
+    }
+  }
+  const fxObserver=hasIO?new IntersectionObserver(es=>{for(const e of es){const S=art.get(e.target);if(S&&S.fx){S.fx.visible=e.isIntersecting;if(S.fx.visible)loop();}}}):null;
+  function attachFx(S,host){
+    if(!fxObserver||calm())return;
+    const d=S.d;S.fx={visible:true,t0:performance.now()-SWEEP*.1,band:Math.max(d.s*4,d.W*.08),lr:d.s*11,bx:null,px:null,py:null,tx:null,ty:null};
+    fxObserver.observe(S.canvas);
+    if(host&&fine()&&!host.__lens){
+      host.__lens=true;
+      const cur=()=>art.get(host.querySelector('[data-art] canvas'));
+      host.addEventListener('pointermove',e=>{const T=cur();if(!T||!T.fx)return;const r=T.canvas.getBoundingClientRect();if(!r.width)return;T.fx.tx=(e.clientX-r.left)*T.d.W/r.width;T.fx.ty=(e.clientY-r.top)*T.d.H/r.height;loop();},{passive:true});
+      host.addEventListener('pointerleave',()=>{const T=cur();if(T&&T.fx){T.fx.tx=T.fx.ty=null;loop();}});
+    }
+  }
+
+  // ---------- card hover / selection: black-white inversion ----------
+  const CARD_SEL='.paper-card,.tp,.fav,.ft,.fx-g';
+  let hovered=null;
+  const wantInverted=card=>card===hovered||card.classList.contains('selected');
+
+  // ---------- build one illustration ----------
   function field(el,fn){
     const d=compute(el,fn);
     const canvas=document.createElement('canvas');canvas.width=d.W;canvas.height=d.H;
     canvas.setAttribute('aria-hidden','true');canvas.dataset.inseArt='true';
     const ctx=canvas.getContext('2d');if(!ctx)return;
     el.replaceChildren(canvas);
-    const ambient=!!el.closest('.hero-art,.ah')&&!!scanObserver;
-    const sc=ambient&&!calm()?{canvas,ctx,d,visible:true,revealing:true,t0:0,lo:Infinity,hi:-Infinity}:null;
-    const startScan=()=>{if(!sc)return;sc.revealing=false;sc.t0=performance.now()-SWEEP_MS*.08;loop();};
-    if(sc){canvas.__scan=sc;scans.add(sc);scanObserver.observe(canvas);}
-    if(calm()){ctx.drawImage(bitmapOf(d),0,0);return;}
-    reveals.add({canvas,ctx,d,t0:performance.now(),from:0,after:startScan});loop();
+    const card=el.closest(CARD_SEL);
+    const S={el,canvas,ctx,d,pals:palettes(el),inv:0,anim:null,fx:null,card,tile:el.closest('.tile')};
+    if(card&&wantInverted(card)){S.inv=1;S.tile?.classList.add('is-inv');}
+    art.set(canvas,S);arts.add(S);
+    const host=el.closest('.hero-art,.ah');
+    if(host)attachFx(S,host);
+    start(S,'reveal');
   }
 
+  function sync(card,x,y){
+    const want=wantInverted(card)?1:0;
+    card.classList.toggle('is-hot',want===1);
+    for(const S of arts){
+      if(S.card!==card)continue;
+      S.tile?.classList.toggle('is-inv',!!want);
+      const target=S.anim&&S.anim.type==='flip'?S.anim.to:S.inv;
+      if(target===want)continue;
+      if(S.anim&&S.anim.type==='reveal'){S.inv=want;continue;}
+      let ox,oy;if(x!=null){const r=S.canvas.getBoundingClientRect();if(r.width){ox=(x-r.left)*S.d.W/r.width;oy=(y-r.top)*S.d.H/r.height;}}
+      start(S,'flip',{to:want,x:ox,y:oy});
+    }
+  }
+  document.addEventListener('pointerover',e=>{
+    if(e.pointerType!=='mouse')return;const card=e.target.closest?.(CARD_SEL)||null;
+    if(card===hovered)return;const prev=hovered;hovered=card;
+    if(prev)sync(prev,e.clientX,e.clientY);if(card)sync(card,e.clientX,e.clientY);
+  },{passive:true});
+  document.addEventListener('pointerout',e=>{
+    if(e.pointerType!=='mouse'||!hovered)return;if(e.relatedTarget&&hovered.contains(e.relatedTarget))return;
+    const prev=hovered;hovered=null;sync(prev,e.clientX,e.clientY);
+  },{passive:true});
+  document.addEventListener('focusin',e=>{const card=e.target.closest?.(CARD_SEL);if(card&&e.target.matches(':focus-visible')){const prev=hovered;hovered=card;if(prev&&prev!==card)sync(prev);sync(card);}});
+  document.addEventListener('focusout',e=>{if(hovered&&!hovered.contains(e.relatedTarget)&&e.target.closest?.(CARD_SEL)===hovered){const p=hovered;hovered=null;sync(p);}});
+  // compare selection is toggled by the app; resync after any interaction
+  const resyncAll=()=>requestAnimationFrame(()=>{const seen=new Set();for(const S of arts)if(S.card&&!seen.has(S.card)){seen.add(S.card);sync(S.card);}});
+  document.addEventListener('click',resyncAll);document.addEventListener('change',resyncAll);
   // ---------- stacked iso slabs ----------
   function slabs(u,v,x,y,W,H,el){
     const n=+(el.dataset.n||4), cx=W*.5, a=W*(+(el.dataset.a||.40)), b=a*.5, gap=+(el.dataset.gap||.13)*H, t=H*.035;
@@ -243,12 +327,12 @@
   }
   function schedule(){
     if(scheduled)return;scheduled=true;
-    if(window.requestIdleCallback)requestIdleCallback(runJobs,{timeout:500});
+    if(window.requestIdleCallback)requestIdleCallback(runJobs,{timeout:300});
     else setTimeout(runJobs,32);
   }
-  const visibleObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
+  const visibleObserver=hasIO?new IntersectionObserver(entries=>{
     for(const entry of entries){if(entry.isIntersecting){visibleObserver.unobserve(entry.target);waiting.delete(entry.target);jobs.add(entry.target);schedule();}}
-  },{rootMargin:'120px'}):null;
+  },{rootMargin:'60px'}):null;
   function render(root=document){
     for(const el of waiting){if(!el.isConnected){visibleObserver?.unobserve(el);waiting.delete(el);}}
     for(const el of jobs){if(!el.isConnected)jobs.delete(el);}
@@ -260,27 +344,82 @@
       if(!visibleObserver||(rect.bottom>=0&&rect.top<=innerHeight))draw(el);
       else if(!waiting.has(el)){waiting.add(el);visibleObserver.observe(el);}
     }
-    countUp(root);
+    decorate(root);
   }
-  // One-off count-up for small Doto numbers (01, 12, …) that are on screen; keeps zero padding.
-  function countUp(root){
-    if(calm()||!root.querySelectorAll)return;
-    const items=[];
-    for(const el of root.querySelectorAll('.dot:not([data-counted])')){
-      const node=el.firstChild;if(!node||node.nodeType!==3)continue;
-      const text=node.nodeValue.trim();if(!/^\d{1,3}$/.test(text)||+text<2)continue;
-      el.dataset.counted='';const rect=el.getBoundingClientRect();
-      if(rect.bottom<0||rect.top>innerHeight||!rect.width)continue;
-      items.push({node,end:+text,width:text.length,lead:node.nodeValue.match(/^\s*/)[0]});
+
+  // ---------- Doto numbers: dot-matrix "ticker" settle, once, when they scroll into view ----------
+  const tickObserver=hasIO?new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){tickObserver.unobserve(e.target);ticker(e.target);}},{threshold:.4}):null;
+  function ticker(el){
+    if(calm()||!el.isConnected)return;
+    const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;
+    while((n=w.nextNode()))if(/\d/.test(n.nodeValue))nodes.push({n,final:n.nodeValue});
+    if(!nodes.length)return;const t0=performance.now();let last=0;
+    const tick=now=>{
+      if(now-last<45){requestAnimationFrame(tick);return;}last=now;let live=false;
+      nodes.forEach((it,k)=>{if(!it.n.isConnected)return;let out='';
+        for(let j=0;j<it.final.length;j++){const ch=it.final[j];
+          if(/\d/.test(ch)&&now-t0<140+(k*3+j)*55){out+=String(Math.floor(Math.random()*10));live=true;}else out+=ch;}
+        it.n.nodeValue=out;});
+      if(live)requestAnimationFrame(tick);else for(const it of nodes)if(it.n.isConnected)it.n.nodeValue=it.final;
+    };
+    requestAnimationFrame(tick);
+  }
+  // ---------- blocks rise in as they enter (opacity/transform only, once) ----------
+  const REVEAL_SEL='.sec,.band,.sblk,.timeline>.tl,.fx,.paper-card,.fav,.topics>.tp,.rows>.row';
+  const riseObserver=hasIO?new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){const el=e.target;riseObserver.unobserve(el);el.classList.add('in');setTimeout(()=>el.classList.remove('rv','in'),1100);}},{rootMargin:'0px 0px -6% 0px'}):null;
+  function decorate(root){
+    if(!root.querySelectorAll||calm())return;
+    if(tickObserver)for(const el of root.querySelectorAll('.dot:not([data-tk])')){
+      if(el.id||el.closest('.hdr,.menu-overlay,#compareTray,svg,.dock'))continue;
+      const t=el.textContent.trim();if(!/\d/.test(t)||t.length>14)continue;
+      el.dataset.tk='';tickObserver.observe(el);
     }
-    if(!items.length)return;const t0=performance.now(),dur=620;
-    const tick=now=>{const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);
-      for(const it of items)if(it.node.isConnected)it.node.nodeValue=it.lead+String(Math.round(it.end*e)).padStart(it.width,'0');
-      if(p<1)requestAnimationFrame(tick);};
-    tick(t0);requestAnimationFrame(tick);
+    if(riseObserver){let i=0;
+      for(const el of root.querySelectorAll(REVEAL_SEL)){
+        if(el.classList.contains('rv')||el.closest('dialog'))continue;
+        if(el.parentElement?.closest('.rv'))continue;
+        const r=el.getBoundingClientRect();if(!r.height||r.top<innerHeight*.94)continue;
+        el.classList.add('rv');el.style.setProperty('--rv-d',(i++%3)*70+'ms');riseObserver.observe(el);
+      }}
   }
+
+  // ---------- page-wide sparse dot grid (one fixed canvas, ~200 dots, cursor halo) ----------
+  function grid(){
+    if(document.querySelector('canvas.bg-grid'))return;
+    const c=document.createElement('canvas');c.className='bg-grid';c.setAttribute('aria-hidden','true');
+    const ctx=c.getContext('2d');if(!ctx)return;document.body.prepend(c);
+    let W=0,H=0,dpr=1,gap=112,pts=null,t0=performance.now(),px=-1e4,py=-1e4,raf2=0,born=calm();
+    function layout(){dpr=Math.min(2,devicePixelRatio||1);W=document.documentElement.clientWidth||innerWidth;H=innerHeight;gap=W<640?72:112;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+      const a=[];for(let y=gap*.28;y<H+gap;y+=gap)for(let x=gap*.28;x<W+gap;x+=gap)a.push(x,y);pts=Float32Array.from(a);}
+    function draw(now){
+      raf2=0;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+      const base=new Path2D(),hot=new Path2D();let busy=false;const t=now-t0;
+      for(let i=0;i<pts.length;i+=2){const x=pts[i],y=pts[i+1];
+        let k=1;if(!born){const p=(t-((x+y)/(W+H))*700-hash(i)*240)/380;if(p<=0){busy=true;continue;}if(p<1){busy=true;k=outBack(p);}}
+        const dx=x-px,dy=y-py,q=1-(dx*dx+dy*dy)/(170*170);
+        if(q>0){const r=(1.1+2.1*q*q)*k;hot.moveTo(x+r,y);hot.arc(x,y,r,0,6.2832);}
+        else{const r=1.1*k;base.moveTo(x+r,y);base.arc(x,y,r,0,6.2832);}}
+      ctx.fillStyle='#c4c4c4';ctx.fill(base);ctx.fillStyle='#7d7d7d';ctx.fill(hot);
+      if(busy)raf2=requestAnimationFrame(draw);else born=true;
+    }
+    const kick=()=>{if(!raf2)raf2=requestAnimationFrame(draw);};
+    layout();kick();
+    let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{layout();kick();},150);},{passive:true});
+    if(fine()&&!calm())addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY;kick();},{passive:true});
+  }
+  // ---------- header wordmark as real dots (per-dot pop-in + hover ripple) ----------
+  function wordmark(){
+    const host=document.querySelector('.hdr .logo');if(!host||host.querySelector('.dm'))return;
+    const G={I:['11111','00100','00100','00100','00100','00100','11111'],N:['10001','11001','11001','10101','10011','10011','10001'],S:['01111','10000','10000','01110','00001','00001','11110'],E:['11111','10000','10000','11110','10000','10000','11111']};
+    let dots='';[...'INSE'].forEach((ch,i)=>G[ch].forEach((row,y)=>[...row].forEach((on,x)=>{if(on==='1')dots+=`<circle cx="${i*6+x+.5}" cy="${y+.5}" r=".36" style="--c:${i*6+x};--r:${y}"/>`;})));
+    host.insertAdjacentHTML('afterbegin',`<svg class="dm" viewBox="0 0 23 7" fill="currentColor" aria-hidden="true">${dots}</svg>`);
+    host.classList.add('has-dm');
+    const svg=host.querySelector('.dm');
+    host.addEventListener('pointerenter',()=>{svg.classList.remove('ripple');void svg.getBoundingClientRect();svg.classList.add('ripple');});
+  }
+  function boot(){render();grid();wordmark();}
   window.InSeArt=Object.freeze({render,types:Object.freeze(Object.keys(MAP))});window.renderArt=render;
-  if(document.readyState!=='loading')render();else document.addEventListener('DOMContentLoaded',()=>render(),{once:true});
+  if(document.readyState!=='loading')boot();else document.addEventListener('DOMContentLoaded',boot,{once:true});
 })();
 
 'use strict';
