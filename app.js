@@ -152,7 +152,8 @@
   }
 
   // ---------- card hover / selection: black-white inversion ----------
-  const CARD_SEL='.paper-card,.tp,.fav,.ft,.fx-g';
+  // large reading features (.ft/.fx-g) keep their colours; only compact cards flip
+  const CARD_SEL='.paper-card,.tp,.fav';
   let hovered=null;
   const wantInverted=card=>card===hovered||card.classList.contains('selected');
 
