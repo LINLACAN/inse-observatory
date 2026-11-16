@@ -444,4 +444,4 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 样式参考 Nothing 官网：浅灰底色、悬浮圆角导航条、常规字重标题、10px 圆角瓷砖、方角按钮。去掉了页脚超大 INSE 和精读卡上的大编号，各页的期号、篇数大字缩小为普通数字。所有改动追加在 style.css 末尾的「Nothing-style refinement」段落。论文数据、筛选、收藏、对比与导出逻辑未改。
 
-资源版本号现为 nothing-20261116-1。
+资源版本号现为 nothing-20261116-2。

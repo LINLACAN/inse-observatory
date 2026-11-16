@@ -905,3 +905,7 @@ html body .tile.is-inv:not(.blk){background:#0F0F10!important;color:#fff}
 html body .tile.blk.is-inv{background:var(--g1)!important;color:var(--ink)}
 html body .view-library .pc .thumb{border-radius:8px}
 html body .paper-dialog .in h1{font-weight:400;font-size:clamp(28px,3vw,40px);letter-spacing:-.02em}
+/* blocks that should not fade (dark bands keep their colour) */
+html body .band.rv,html body .dark.rv{opacity:1!important;transform:none!important}
+/* crisp small labels */
+html body .mono{-webkit-font-smoothing:auto}

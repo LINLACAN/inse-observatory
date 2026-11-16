@@ -16,10 +16,9 @@
   // ---------- geometry (cached per size + dataset) ----------
   const dataCache=new Map();
   function compute(el,fn){
-    const cssW=el.clientWidth,cssH=el.clientHeight;
-    const scale=Math.min(1,720/cssW,800/cssH);
-    const W=Math.max(1,Math.round(cssW*scale)),H=Math.max(1,Math.round(cssH*scale));
-    const s=Math.max(6,Math.min(20,Math.round(+(el.dataset.step||8)*scale)));
+    // geometry in CSS pixels; the canvas backing store is scaled to the screen's pixel ratio
+    const W=Math.max(1,Math.round(el.clientWidth)),H=Math.max(1,Math.round(el.clientHeight));
+    const s=2*Math.round(Math.max(6,Math.min(20,+(el.dataset.step||8)*Math.max(1,Math.max(W,H)/900)))/2); // even step → dot centres on whole pixels
     const ghost=el.dataset.ghost;
     const key=JSON.stringify([W,H,s,el.dataset]);
     const hit=dataCache.get(key);
@@ -28,7 +27,7 @@
     for(let y=s/2;y<H;y+=s){for(let x=s/2;x<W;x+=s){
       const result=fn(x/W,y/H,x,y,W,H);let v=result,color=0;
       if(typeof result==='object'&&result){v=result.v;color=result.red?1:0;}
-      let radius=0;if(v>.05)radius=s*.46*clamp(v);else if(ghost){radius=s*.08;color=2;}
+      let radius=0;if(v>.05)radius=s*.46*clamp(v);else if(ghost){radius=Math.max(.9,s*.09);color=2;}
       if(radius){xs.push(x);ys.push(y);rs.push(radius);cs.push(color);}
     }rowStart.push(xs.length);}
     const n=xs.length,jit=new Float32Array(n);for(let i=0;i<n;i++)jit[i]=hash(i);
@@ -56,7 +55,7 @@
   }
   // Draw dots in rows [r0,r1) with x in [x0,x1). Returns true while any dot is still animating.
   function paint(S,t,x0,x1,r0,r1){
-    const {d,ctx,anim}=S,max=d.s*.5,P=[null,null,null,null,null,null,null];
+    const {d,ctx,anim}=S,max=d.s*.48,P=[null,null,null,null,null,null,null];
     const path=k=>P[k]||(P[k]=new Path2D());
     let busy=false;
     for(let r=r0;r<r1;r++){for(let i=d.rowStart[r],e=d.rowStart[r+1];i<e;i++){
@@ -110,7 +109,7 @@
       // dots pop one by one: a soft diagonal sweep broken up by per-dot jitter
       const span=Math.min(620,220+d.n*.06);
       for(let i=0;i<d.n;i++)delay[i]=((d.xs[i]/d.W)*.45+(d.ys[i]/d.H)*.55)*span+d.jit[i]*260;
-      S.anim={type,t0:performance.now(),dur:420,delay};
+      S.anim={type,t0:performance.now()+(opts.wait||0),dur:420,delay};
     }else{
       // black/white flip spreading from the pointer
       const ox=opts.x??d.W/2,oy=opts.y??d.H/2,far=Math.hypot(Math.max(ox,d.W-ox),Math.max(oy,d.H-oy))||1;
@@ -160,9 +159,11 @@
   // ---------- build one illustration ----------
   function field(el,fn){
     const d=compute(el,fn);
-    const canvas=document.createElement('canvas');canvas.width=d.W;canvas.height=d.H;
+    const k=Math.min(2,Math.max(1,window.devicePixelRatio||1),2400/Math.max(d.W,d.H));
+    const canvas=document.createElement('canvas');canvas.width=Math.round(d.W*k);canvas.height=Math.round(d.H*k);
     canvas.setAttribute('aria-hidden','true');canvas.dataset.inseArt='true';
     const ctx=canvas.getContext('2d');if(!ctx)return;
+    ctx.setTransform(canvas.width/d.W,0,0,canvas.height/d.H,0,0);
     el.replaceChildren(canvas);
     const card=el.closest(CARD_SEL);
     const S={el,canvas,ctx,d,pals:palettes(el),inv:0,anim:null,fx:null,card,tile:el.closest('.tile')};
@@ -170,7 +171,8 @@
     art.set(canvas,S);arts.add(S);
     const host=el.closest('.hero-art,.ah');
     if(host)attachFx(S,host);
-    start(S,'reveal');
+    const rising=el.closest('.rv');
+    start(S,'reveal',{wait:rising?140+(parseFloat(rising.style.getPropertyValue('--rv-d'))||0):0});
   }
 
   function sync(card,x,y){
@@ -332,7 +334,7 @@
   }
   const visibleObserver=hasIO?new IntersectionObserver(entries=>{
     for(const entry of entries){if(entry.isIntersecting){visibleObserver.unobserve(entry.target);waiting.delete(entry.target);jobs.add(entry.target);schedule();}}
-  },{rootMargin:'60px'}):null;
+  },{rootMargin:'0px 0px -8% 0px',threshold:.12}):null;
   function render(root=document){
     for(const el of waiting){if(!el.isConnected){visibleObserver?.unobserve(el);waiting.delete(el);}}
     for(const el of jobs){if(!el.isConnected)jobs.delete(el);}
@@ -365,7 +367,7 @@
     requestAnimationFrame(tick);
   }
   // ---------- blocks rise in as they enter (opacity/transform only, once) ----------
-  const REVEAL_SEL='.sec,.band,.sblk,.timeline>.tl,.fx,.paper-card,.fav,.topics>.tp,.rows>.row';
+  const REVEAL_SEL='.sechead,.issue-brief .brief,.feat>.ft,.reading-preview .feat>*,.view-reading .fx,.paper-card,.fav,.topics>.tp,.rows>.row,.timeline>.tl,.sblk';
   const riseObserver=hasIO?new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){const el=e.target;riseObserver.unobserve(el);el.classList.add('in');setTimeout(()=>el.classList.remove('rv','in'),1100);}},{rootMargin:'0px 0px -6% 0px'}):null;
   function decorate(root){
     if(!root.querySelectorAll||calm())return;
@@ -374,12 +376,14 @@
       const t=el.textContent.trim();if(!/\d/.test(t)||t.length>14)continue;
       el.dataset.tk='';tickObserver.observe(el);
     }
-    if(riseObserver){let i=0;
+    if(riseObserver){
       for(const el of root.querySelectorAll(REVEAL_SEL)){
-        if(el.classList.contains('rv')||el.closest('dialog'))continue;
+        if(el.classList.contains('rv')||el.closest('dialog,.dark'))continue;
         if(el.parentElement?.closest('.rv'))continue;
         const r=el.getBoundingClientRect();if(!r.height||r.top<innerHeight*.94)continue;
-        el.classList.add('rv');el.style.setProperty('--rv-d',(i++%3)*70+'ms');riseObserver.observe(el);
+        // stagger by position within its row of siblings
+        const idx=[...el.parentElement.children].indexOf(el);
+        el.classList.add('rv');el.style.setProperty('--rv-d',(idx%4)*80+'ms');riseObserver.observe(el);
       }}
   }
 
