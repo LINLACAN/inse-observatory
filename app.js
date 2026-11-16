@@ -5,21 +5,31 @@
   const NS='http://www.w3.org/2000/svg';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 
-  function field(el,fn,opt){
-    const W=el.clientWidth,H=el.clientHeight,s=Math.max(5,Math.min(24,+(el.dataset.step||opt.step||9)));
-    const fg=el.dataset.fg||'#0B0B0B', red=el.dataset.red||'#D71921';
-    const svg=document.createElementNS(NS,'svg');
-    svg.setAttribute('width',W);svg.setAttribute('height',H);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('aria-hidden','true');svg.setAttribute('focusable','false');svg.dataset.inseArt='true';svg.style.setProperty('--art-fg',fg);
-    let out='';
-    const ghost=el.dataset.ghost; // faint background grid colour
+  // One static bitmap per illustration; no per-dot DOM, animation or scroll redraw.
+  const bitmapCache=new Map();
+  function field(el,fn){
+    const cssW=el.clientWidth,cssH=el.clientHeight;
+    const scale=Math.min(1,720/cssW,800/cssH);
+    const W=Math.max(1,Math.round(cssW*scale)),H=Math.max(1,Math.round(cssH*scale));
+    const s=Math.max(6,Math.min(20,Math.round(+(el.dataset.step||8)*scale)));
+    const fg=el.dataset.fg||'#0B0B0B',red=el.dataset.red||'#D71921',ghost=el.dataset.ghost;
+    const key=JSON.stringify([W,H,s,el.dataset]);
+    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+    canvas.setAttribute('aria-hidden','true');canvas.dataset.inseArt='true';
+    const ctx=canvas.getContext('2d');if(!ctx)return;
+    const cached=bitmapCache.get(key);
+    if(cached){ctx.drawImage(cached,0,0);el.replaceChildren(canvas);return;}
+    const paths=[new Path2D(),new Path2D(),new Path2D()];
     for(let y=s/2;y<H;y+=s){for(let x=s/2;x<W;x+=s){
-      const r=fn(x/W,y/H,x,y,W,H);
-      let v=r, c='var(--art-fg)';
-      if(typeof r==='object'&&r){v=r.v;c=r.red?red:'var(--art-fg)'}
-      if(v>0.05){out+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(s*0.46*clamp(v)).toFixed(2)}" fill="${c}"/>`}
-      else if(ghost){out+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(s*0.08).toFixed(2)}" fill="${ghost}"/>`}
+      const result=fn(x/W,y/H,x,y,W,H);let v=result,color=0;
+      if(typeof result==='object'&&result){v=result.v;color=result.red?1:0;}
+      let radius=0;if(v>.05)radius=s*.46*clamp(v);else if(ghost){radius=s*.08;color=2;}
+      if(radius){paths[color].moveTo(x+radius,y);paths[color].arc(x,y,radius,0,Math.PI*2);}
     }}
-    svg.innerHTML=out;el.replaceChildren(svg);
+    [fg,red,ghost].forEach((color,i)=>{if(color){ctx.fillStyle=color;ctx.fill(paths[i]);}});
+    bitmapCache.set(key,canvas);
+    if(bitmapCache.size>8)bitmapCache.delete(bitmapCache.keys().next().value);
+    el.replaceChildren(canvas);
   }
 
   // ---------- stacked iso slabs ----------
@@ -137,39 +147,38 @@
   }
 
   const MAP={slabs,sphere,hexflake,layers,lattice,spectrum};
-  const tracked=new Set(), signatures=new WeakMap(), pending=new Set();
-  let frame=0;
-  function draw(el,force=false){
-    if(!el.isConnected||el.clientWidth<1||el.clientHeight<1)return;
+  const waiting=new Set(),jobs=new Set();let scheduled=false;
+  function draw(el){
+    if(!el.isConnected||el.clientWidth<1||el.clientHeight<1||el.firstElementChild)return;
     const fn=MAP[el.dataset.art];if(!fn)return;
-    const signature=JSON.stringify([Math.round(el.clientWidth),Math.round(el.clientHeight),el.dataset]);
-    if(!force&&signatures.get(el)===signature)return;
-    field(el,(u,v,x,y,W,H)=>fn(u,v,x,y,W,H,el),{});
-    signatures.set(el,signature);
+    field(el,(u,v,x,y,W,H)=>fn(u,v,x,y,W,H,el));
   }
-  function queue(el){
-    pending.add(el);if(frame)return;
-    frame=requestAnimationFrame(()=>{frame=0;for(const node of pending)draw(node);pending.clear();});
+  function runJobs(){
+    scheduled=false;const el=jobs.values().next().value;
+    if(!el)return;jobs.delete(el);draw(el);if(jobs.size)schedule();
   }
-  const sizeObserver=typeof ResizeObserver==='function'?new ResizeObserver(entries=>entries.forEach(entry=>queue(entry.target))):null;
+  function schedule(){
+    if(scheduled)return;scheduled=true;
+    if(window.requestIdleCallback)requestIdleCallback(runJobs,{timeout:500});
+    else setTimeout(runJobs,32);
+  }
   const visibleObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{if(entry.isIntersecting){draw(entry.target);visibleObserver.unobserve(entry.target);}});
-  },{rootMargin:'240px'}):null;
+    for(const entry of entries){if(entry.isIntersecting){visibleObserver.unobserve(entry.target);waiting.delete(entry.target);jobs.add(entry.target);schedule();}}
+  },{rootMargin:'120px'}):null;
   function render(root=document){
-    for(const el of tracked){if(!el.isConnected){sizeObserver?.unobserve(el);visibleObserver?.unobserve(el);tracked.delete(el);}}
-    const nodes=[];if(root.matches?.('[data-art]'))nodes.push(root);
-    nodes.push(...root.querySelectorAll('[data-art]'));
+    for(const el of waiting){if(!el.isConnected){visibleObserver?.unobserve(el);waiting.delete(el);}}
+    for(const el of jobs){if(!el.isConnected)jobs.delete(el);}
+    const nodes=[];if(root.matches?.('[data-art]'))nodes.push(root);nodes.push(...root.querySelectorAll('[data-art]'));
     for(const el of nodes){
-      if(!MAP[el.dataset.art])continue;
-      if(!tracked.has(el)){tracked.add(el);sizeObserver?.observe(el);visibleObserver?.observe(el);}
+      if(!MAP[el.dataset.art]||el.firstElementChild)continue;
       const rect=el.getBoundingClientRect();
-      if(!visibleObserver||(rect.bottom>=-240&&rect.top<=innerHeight+240))draw(el);
+      if(rect.width<1||rect.height<1)continue;
+      if(!visibleObserver||(rect.bottom>=0&&rect.top<=innerHeight))draw(el);
+      else if(!waiting.has(el)){waiting.add(el);visibleObserver.observe(el);}
     }
   }
-  window.InSeArt=Object.freeze({render,types:Object.freeze(Object.keys(MAP))});
-  window.renderArt=render;
+  window.InSeArt=Object.freeze({render,types:Object.freeze(Object.keys(MAP))});window.renderArt=render;
   if(document.readyState!=='loading')render();else document.addEventListener('DOMContentLoaded',()=>render(),{once:true});
-  if(!sizeObserver)window.addEventListener('resize',()=>tracked.forEach(queue),{passive:true});
 })();
 
 'use strict';
