@@ -22,7 +22,7 @@
 
 调整页面结构请编辑 index.html；调整颜色、字体、间距和手机布局请编辑 style.css；修改卡片、筛选、对比与展示逻辑请编辑 app.js；更新文献和期次请编辑 data.json。以上四个文件均为直接发布源文件，不需要运行改版归档中的一次性构建程序。可在 GitHub 网页直接修改，也可本地修改后提交，同步后检查 Pages 部署成功。
 
-字体已嵌入 style.css，无字体 CDN 请求。中文子集覆盖当前资料和页面文字；新增文字会使用系统中文字体补足。字体完整许可如下。收藏沿用原有浏览器存储键，不会因本次改版主动清除。每周手动更新入口仍在本地资料根目录 00_每周手动更新.html，本次没有改变更新任务或接入模型。
+品牌数字使用内嵌 Doto；中文、英文正文和等宽标签改用系统字体，无字体 CDN 请求。完整字体许可保留供历史版本追溯。收藏沿用原有浏览器存储键，不会因本次改版主动清除。每周手动更新入口仍在本地资料根目录 00_每周手动更新.html，本次没有改变更新任务或接入模型。
 
 
 ## 本地字体许可
@@ -421,3 +421,10 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+## 2026-11-16 轻量化优化
+
+点阵插图改为静态 Canvas，一幅图只保留一个绘制元素。首屏以外的插图接近可见区域时才绘制；移除 ResizeObserver 批量重绘和逐圆点动画。画布尺寸设上限，插图缓存最多 8 项。正文改用系统字体，仅保留 Doto 品牌字体；取消抽屉底栏模糊及全页平滑滚动。论文数据、筛选、收藏与更新规则保持不变。
+
+资源版本号为 lite-20261116-1。修改 app.js 或 style.css 后，请继续更新 index.html 两处版本号。不同系统的正文字形可能略有差别。
