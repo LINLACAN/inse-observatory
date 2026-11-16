@@ -1,0 +1,586 @@
+{
+  "papers": [
+    {
+      "id": "space-inse-2026",
+      "title": "Microgravity-activated high-performance van der Waals InSe ferroelectric semiconductor",
+      "titleZh": "微重力激活高性能范德华 InSe 铁电半导体",
+      "date": "2026-03-12",
+      "dateNote": "出版商 Published 日期；Version of record 为 2026-04-28，不能当作另一篇新论文",
+      "publicationType": "peer-reviewed",
+      "journal": "Nature Communications 17, 3851",
+      "doi": "10.1038/s41467-026-70520-1",
+      "url": "https://www.nature.com/articles/s41467-026-70520-1",
+      "materials": [
+        "InSe",
+        "γ-InSe"
+      ],
+      "method": "Bridgman 块体生长＋机械剥离",
+      "topics": [
+        "空间微重力",
+        "空间与地面对照",
+        "晶体结构",
+        "堆垛层错",
+        "滑移铁电"
+      ],
+      "question": "空间生长能否减少 InSe 堆垛层错，并显现滑移铁电性？",
+      "design": "中国空间站和地面用相同名义生长参数制备块体，剥离后比较 TEM、PFM 与晶体管。",
+      "mechanism": "原子像支持空间样品层错减少、ABC 堆垛更规则；作者将铁电和电光改善联系于此。",
+      "metrics": [
+        {
+          "label": "最大晶体管迁移率",
+          "value": "195.3 cm² V⁻¹ s⁻¹",
+          "conditions": "室温真空，15 nm InSe/22 nm h-BN/50 nm SiO₂；图4f背栅FeSFET的载流子迁移率，不是所有样品均值。提取公式、介质电容与接触校正未逐项核实。"
+        },
+        {
+          "label": "器件开关比",
+          "value": "10⁶",
+          "conditions": "上述特定晶体管；不代表相对地面样品提升10⁶倍。"
+        },
+        {
+          "label": "存储窗口",
+          "value": "约 11.4 V",
+          "conditions": "最大栅扫描电压20 V；具体扫描参数见原论文图4。"
+        }
+      ],
+      "limitations": "这是 Bridgman 块体后剥离的直接对照，不能证明空间 CVD 薄片同样获益；各指标为特定器件结果，非普适增益。补充材料未逐项复核。",
+      "reproducibility": "In:Se=0.52:0.48，6N 原料；715°C、保温3 h、1 mm/h、约30°C/cm；完整热程序需核对补图14。",
+      "difference": "把空间/地面直接对照延伸到原子堆垛、铁电与器件，超出仅报告地面生长与热性质的工作。",
+      "sourceAccess": "已核查出版商索引的正文、方法与图4；直接页面访问受到登录重定向，未逐项核查补充材料。",
+      "sources": [
+        {
+          "label": "出版商正文与方法",
+          "url": "https://www.nature.com/articles/s41467-026-70520-1"
+        },
+        {
+          "label": "出版商正式版 PDF",
+          "url": "https://www.nature.com/articles/s41467-026-70520-1.pdf"
+        }
+      ],
+      "tags": [
+        "空间／地面直接对照"
+      ],
+      "featured": true,
+      "readingReason": "值得精读：同时提供原子结构与器件证据，尤其适合练习区分实验观察、机制解释与向 CVD 外推的边界。",
+      "readingGuide": [
+        "先读图1，辨认空间站Bridgman与地面对照的共同参数和差异。",
+        "再读TEM堆垛证据与铁电测量，区分原子结构观察与作者机制解释。",
+        "最后核对图4器件厚度、环境、栅扫描条件；思考为什么这些结果不能直接代表空间CVD。"
+      ]
+    },
+    {
+      "id": "gunkel-2026-mocvd",
+      "title": "Low Temperature MOCVD Synthesis of High-Mobility 2D InSe",
+      "titleZh": "低温 MOCVD 生长高迁移率二维 InSe",
+      "date": "2026-01-25",
+      "dateNote": "出版商首次发表日期；卷期日期为 2026-02-20",
+      "publicationType": "peer-reviewed",
+      "journal": "Small 22(11), e10911",
+      "doi": "10.1002/smll.202510911",
+      "url": "https://doi.org/10.1002/smll.202510911",
+      "preprintUrl": "https://arxiv.org/abs/2509.21082",
+      "materials": [
+        "InSe"
+      ],
+      "method": "MOCVD",
+      "topics": [
+        "气相生长",
+        "相选择",
+        "晶体结构",
+        "载流子输运"
+      ],
+      "question": "能否降低 InSe 相纯薄膜的生长温度？",
+      "design": "在 c 面蓝宝石上扫描温度与 DiPSe/TMIn 供给比，用 Raman、AFM、STEM 和 XRD 交叉验相。",
+      "mechanism": "DiPSe 较易分解；硒供给与温度共同改变表面化学计量，适中窗口形成 InSe。",
+      "metrics": [
+        {
+          "label": "相纯生长温度",
+          "value": "350–400 °C",
+          "conditions": "TMIn/DiPSe，c面蓝宝石；水平MOCVD反应器。"
+        },
+        {
+          "label": "有效迁移率（THz模型）",
+          "value": "约 325 cm² V⁻¹ s⁻¹",
+          "conditions": "480 nm 光泵浦、THz 探测及 Drude–Smith 拟合；假设电子有效质量 0.1mₑ。约 1200 为模型本征值，约 325 为考虑背散射后的有效值，均非 FET 场效应迁移率。"
+        },
+        {
+          "label": "薄层厚度演化",
+          "value": "0.8 → 4.1 nm",
+          "conditions": "400 °C，生长时间1.5 → 9 h，AFM中位高度。"
+        }
+      ],
+      "limitations": "存在强背散射；迁移率依赖模型和有效质量假设。未证明器件集成或微重力优势。",
+      "reproducibility": "正文方法：水平 MOCVD，50 mbar，H₂ 总流量 6800 sccm，TMIn 预沉积 170 s；完整补充材料尚未复核。",
+      "difference": "相较早期 DMSe/DESe 路线，引入 DiPSe 与 In 富集成核步骤，把相纯二维生长推向 350–400°C。",
+      "sourceAccess": "已读开放正文与方法；未核查完整补充材料",
+      "sources": [
+        {
+          "label": "原始研究来源",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12921547/"
+        },
+        {
+          "label": "开放版本／发表记录",
+          "url": "https://onlinelibrary.wiley.com/doi/full/10.1002/smll.202510911"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": true,
+      "readingReason": "适合练习把相图、结构证据与模型推导的迁移率联系起来。",
+      "readingGuide": [
+        "先读温度—Se/In供给比相图，观察InSe与其他In–Se相的边界。",
+        "结合AFM时间序列与STEM图，区分薄片并合、相纯度和单晶性。",
+        "读OPTP/Drude–Smith拟合方法，确认325与1200两类迁移率的模型假设。"
+      ],
+      "evidence": "地面实验"
+    },
+    {
+      "id": "oxidation-inse-2024",
+      "title": "Origin of Oxidation Variations in Ambient-Stable β-InSe",
+      "titleZh": "环境稳定 β-InSe 中氧化差异的起源",
+      "date": "2024-11-12",
+      "dateNote": "作者机构保存的出版商 PDF Published 日期；卷期日期为 2024-11-27",
+      "publicationType": "peer-reviewed",
+      "journal": "ACS Applied Materials & Interfaces 16, 65628–65634",
+      "doi": "10.1021/acsami.4c15577",
+      "url": "https://pubs.acs.org/doi/10.1021/acsami.4c15577",
+      "materials": [
+        "InSe",
+        "β-InSe"
+      ],
+      "method": "温度梯度块体生长＋原位解理／Ar⁺ 溅射",
+      "topics": [
+        "缺陷",
+        "氧化稳定性",
+        "原位光电子能谱",
+        "DFT"
+      ],
+      "question": "为什么 InSe 氧化实验对稳定性及氧化产物的结论不一致？",
+      "design": "比较洁净解理表面与 Ar⁺ 制缺陷表面，逐步给氧并测 PES/XPS、功函数、散射及 I–V，结合 DFT。",
+      "mechanism": "低缺陷时氧先向层内扩散，随后 Se 位点氧化；高缺陷时出现 In 氧化通道。表面信号弱不能等同内部未变化。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "低缺陷样品给氧至 2850 L 前表面 XPS 无明显变化；累计10800 L时可见约60.7 eV SeO₂相关峰。L 为氧剂量单位，不是时间。",
+          "conditions": "仅限本研究样品与实验条件；详细条件见实验设计与复现说明。"
+        }
+      ],
+      "limitations": "受控纯氧和溅射表面不能直接代表潮湿空气中的所有 CVD 薄片；此结果不是器件寿命指标。",
+      "reproducibility": "In:Se=1:1；真空解理后用99.999% O₂逐次给氧，总量10800 L；高缺陷对照使用3 keV Ar⁺溅射，细节仍需补充材料。",
+      "difference": "用原位化学证据把缺陷密度与不同氧化路径联系起来，解释此前相互冲突的稳定性报告。",
+      "sourceAccess": "已阅读作者机构保存的7页出版商正式PDF；补充材料未复核。",
+      "sources": [
+        {
+          "label": "出版商 DOI",
+          "url": "https://pubs.acs.org/doi/10.1021/acsami.4c15577"
+        },
+        {
+          "label": "作者机构公开正式 PDF",
+          "url": "https://swb.skku.edu/sclim/papers.do?articleNo=51207&attachNo=49458&mode=download"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "用对照设计区分观测结果与机制解释。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ]
+    },
+    {
+      "id": "endo-2024-phase",
+      "title": "Phase-controlled growth of indium selenide by metalorganic chemical vapor deposition",
+      "titleZh": "MOCVD 硒化铟生长中的相控制",
+      "date": "2024-04-01",
+      "dateNote": "Journal of Crystal Growth 卷期日期；首次在线日期未核实",
+      "publicationType": "peer-reviewed",
+      "journal": "Journal of Crystal Growth 631, 127612",
+      "doi": "10.1016/j.jcrysgro.2024.127612",
+      "url": "https://doi.org/10.1016/j.jcrysgro.2024.127612",
+      "materials": [
+        "InSe",
+        "In₂Se₃"
+      ],
+      "method": "MOCVD",
+      "topics": [
+        "气相生长",
+        "相选择",
+        "Raman / XRD"
+      ],
+      "question": "温度和气相 VI/III 比如何决定得到 InSe 还是 In₂Se₃？",
+      "design": "TMIn、DESe 在蓝宝石(0001)上生长；扫描温度和 VI/III 摩尔比，以 Raman 与 XRD 判相。",
+      "mechanism": "升温改变相的热稳定性；Se 源分解控制表面化学计量，富硒条件偏向 In₂Se₃。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "VI/III = 11.8、500°C 样品出现 InSe Raman 峰约 114、176、198、226 cm⁻¹；未核实器件性能数据。",
+          "conditions": "上述峰位对应文中 500°C 生长样品；峰位证据不能单独证明无缺陷或高迁移率。"
+        }
+      ],
+      "limitations": "本卡基于出版商摘要与可见结果段落，未完成全文和补充材料审查。相图依赖反应器与前驱体。",
+      "reproducibility": "已核实 TMIn/DESe、蓝宝石(0001)和扫描变量；压力、流量、时间等完整配方未核实。",
+      "difference": "把零散生长条件整理为温度—供给比相图，并将 InSe/β-In₂Se₃ 边界联系到 Se 源分解。",
+      "sourceAccess": "出版商摘要及可见结果/总结段；全文访问受限",
+      "sources": [
+        {
+          "label": "原始研究来源",
+          "url": "https://www.sciencedirect.com/science/article/pii/S0022024824000472"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "用基础反应动力学理解：气相比例并不等于薄膜原子比例。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ],
+      "evidence": "地面实验"
+    },
+    {
+      "id": "song-2023-wafer",
+      "title": "Wafer-scale growth of two-dimensional, phase-pure InSe",
+      "titleZh": "晶圆尺度相纯二维 InSe 生长",
+      "date": "2023-10-04",
+      "dateNote": "Matter 卷期日期，经作者机构库核实；预印本首次提交 2023-03-04。卡中数值来自预印本全文，尚未逐项核对最终版。",
+      "publicationType": "peer-reviewed",
+      "journal": "Matter 6(10), 3483–3498",
+      "doi": "10.1016/j.matt.2023.07.012",
+      "url": "https://doi.org/10.1016/j.matt.2023.07.012",
+      "preprintUrl": "https://arxiv.org/abs/2303.02530",
+      "materials": [
+        "InSe",
+        "In₂Se₃"
+      ],
+      "method": "MOCVD",
+      "topics": [
+        "气相生长",
+        "相选择",
+        "晶圆尺度",
+        "外延"
+      ],
+      "question": "能否兼顾 InSe 相选择、横向并合与晶圆厚度控制？",
+      "design": "在 2 英寸 c 面蓝宝石上用 TMIn/DMSe 垂直冷壁 MOCVD，并比较连续与脉冲供硒。",
+      "mechanism": "周期中断 Se 供给形成瞬时缺硒环境，促进 InSe 成核并抑制富 In 液滴。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "2 英寸晶圆；预印本少层顶栅 FET 在室温下最佳双端场效应迁移率约 2.8 cm² V⁻¹ s⁻¹，开关比约 10⁴–10⁵。",
+          "conditions": "少层、约 2 μm 栅长的顶栅器件；以上为预印本数值，并非单层或 Hall 迁移率。"
+        }
+      ],
+      "limitations": "超薄层受空气退化与接触影响；晶圆覆盖不等于整片无晶界单晶。最终期刊数值未逐项复核。",
+      "reproducibility": "已读预印本及合并补充信息；复现实验仍需按原文核对气体时序、流量、压力和设备标定。",
+      "difference": "相较粉末 CVD，改用可调前驱体脉冲实现晶圆尺度的相选择与逐层生长。",
+      "sourceAccess": "预印本全文；期刊发表状态由作者机构库核实，期刊正文访问受限",
+      "sources": [
+        {
+          "label": "原始研究来源",
+          "url": "https://arxiv.org/abs/2303.02530"
+        },
+        {
+          "label": "开放版本／发表记录",
+          "url": "https://arxiv.org/pdf/2303.02530"
+        },
+        {
+          "label": "开放版本／发表记录",
+          "url": "https://pure.skku.edu/en/publications/wafer-scale-growth-of-two-dimensional-phase-pure-inse/"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "适合比较供给时序对成核、相选择和横向生长的影响。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ],
+      "evidence": "地面实验"
+    },
+    {
+      "id": "laser-pl-inse-2023",
+      "title": "Revealing the origin of PL evolution of InSe flake induced by laser irradiation",
+      "titleZh": "揭示激光照射下 InSe 薄片光致发光演化的起源",
+      "date": "2023-03-08",
+      "dateNote": "RSC 出版商 First published 日期",
+      "publicationType": "peer-reviewed",
+      "journal": "RSC Advances 13, 7780–7788",
+      "doi": "10.1039/D3RA00324H",
+      "url": "https://pubs.rsc.org/en/content/articlelanding/2023/ra/d3ra00324h",
+      "materials": [
+        "InSe"
+      ],
+      "method": "机械剥离＋激光处理／Ar 等离子体",
+      "topics": [
+        "缺陷",
+        "光氧化",
+        "Raman",
+        "PL",
+        "测量扰动"
+      ],
+      "question": "为什么激光照射有时使 InSe 的 PL 先增强，有时直接衰减？",
+      "design": "同一点重复测量，改变功率与环境，并用等离子体引入缺陷作对照。",
+      "mechanism": "作者用空位钝化与氧化降解的竞争解释弱光先增后减；强光下加热与氧化破坏占优。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "532 nm、约500 nm光斑：0.2 mW时PL先增后减，2 mW时直接减弱；这两档功率的行为仅对应此光路与样品，不构成通用阈值。",
+          "conditions": "仅限本研究样品与实验条件；详细条件见实验设计与复现说明。"
+        }
+      ],
+      "limitations": "PL增强不能单独证明结构质量提高；激光本身改变样品，不能把峰位漂移直接当作绝对温度。",
+      "reproducibility": "PDMS剥离转移到300 nm SiO₂/Si；100×、NA0.95；每次积分3 s、累积2次，测量间隔3 s；需记录实际光斑和样品功率。",
+      "difference": "采用间隔重复测量与环境/缺陷对照，为先前主要理论解释补充实验依据。",
+      "sourceAccess": "已核查 RSC 索引正文实验段与结果段、出版日期；补充材料未逐项复核。",
+      "sources": [
+        {
+          "label": "出版商论文与日期",
+          "url": "https://pubs.rsc.org/en/content/articlelanding/2023/ra/d3ra00324h"
+        },
+        {
+          "label": "出版商正式 PDF",
+          "url": "https://pubs.rsc.org/en/content/articlepdf/2023/ra/d3ra00324h"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "用对照设计区分观测结果与机制解释。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ]
+    },
+    {
+      "id": "stem-defects-2019",
+      "title": "Formation and Healing of Defects in Atomically Thin GaSe and InSe",
+      "titleZh": "原子薄 GaSe 与 InSe 中缺陷的形成与修复",
+      "date": "2019-04-17",
+      "dateNote": "ACS 文章历史 Published Online；页面上方 April04 为接受日期，不作发表日期",
+      "publicationType": "peer-reviewed",
+      "journal": "ACS Nano 13, 5112–5123",
+      "doi": "10.1021/acsnano.8b08253",
+      "url": "https://pubs.acs.org/doi/10.1021/acsnano.8b08253",
+      "materials": [
+        "InSe",
+        "GaSe"
+      ],
+      "method": "机械剥离＋石墨烯封装＋ADF-STEM",
+      "topics": [
+        "缺陷",
+        "原子结构",
+        "电子束损伤",
+        "空位修复"
+      ],
+      "question": "如何直接辨认并追踪 InSe 原子缺陷的生成、迁移与修复？",
+      "design": "对单层、双层及少层样品做时间序列STEM成像，用DFT结构辅助识别。",
+      "mechanism": "电子束可生成金属/Se空位；存在Se时空位可补回，杂质也可进入；长期照射使点缺陷聚并。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "报告原子级时间序列证据：InSe主要形成线缺陷，GaSe倾向三角形缺陷；未核实可比较的缺陷密度或器件性能数值。",
+          "conditions": "仅限本研究样品与实验条件；详细条件见实验设计与复现说明。"
+        }
+      ],
+      "limitations": "成像束流同时改造缺陷，不能把照射后结构当作原始CVD样品的无扰动缺陷统计。",
+      "reproducibility": "石墨烯夹层隔离空气，记录STEM成像条件并对照DFT；束能、剂量和制样细节未完整核验，卡片不足以独立复现。",
+      "difference": "将静态缺陷讨论推进到原子尺度生成、移动与修复的直接观察，并比较GaSe/InSe。",
+      "sourceAccess": "已核查出版商摘要、文章历史及作者稿索引；完整方法和补充材料访问受限。",
+      "sources": [
+        {
+          "label": "ACS 出版商摘要与文章历史",
+          "url": "https://pubs.acs.org/doi/10.1021/acsnano.8b08253"
+        },
+        {
+          "label": "作者机构稿",
+          "url": "https://nottingham-repository.worktribe.com/preview/1752578/Defects_GaSe_and_InSe.pdf"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "用对照设计区分观测结果与机制解释。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ]
+    },
+    {
+      "id": "huang-2018-confined",
+      "title": "Phase-Engineered Growth of Ultrathin InSe Flakes by Chemical Vapor Deposition for High-Efficiency Second Harmonic Generation",
+      "titleZh": "限域 CVD 相工程制备超薄 InSe 与二次谐波",
+      "date": "2018-09-16",
+      "dateNote": "Wiley Version of Record 在线日期；接受稿上线为 2018-07-20，卷期为 2018-10-17",
+      "publicationType": "peer-reviewed",
+      "journal": "Chemistry—A European Journal 24(58), 15678–15684",
+      "doi": "10.1002/chem.201803634",
+      "url": "https://doi.org/10.1002/chem.201803634",
+      "materials": [
+        "InSe",
+        "In₂Se₃"
+      ],
+      "method": "限域 CVD",
+      "topics": [
+        "气相生长",
+        "相选择",
+        "晶体对称性",
+        "非线性光学"
+      ],
+      "question": "如何抑制共存 In₂Se₃，生长超薄单晶 InSe？",
+      "design": "用空间限域 CVD 稳定传质，调节 H₂ 与 Se 供给，并考察二次谐波响应。",
+      "mechanism": "作者将相选择归因于高 H₂ 含量与缺 Se 的协同；非中心对称结构允许二次谐波。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "摘要报告超薄单晶薄片与二次谐波响应；尺寸、厚度和 SHG 定量系数未核实。",
+          "conditions": "未取得完整实验与光学测试参数，不提供未经核实的效率数字。"
+        }
+      ],
+      "limitations": "摘要中的高性能措辞不足以定量比较；SHG 也不能独立证明无缺陷。",
+      "reproducibility": "路线为限域 CVD；补充材料未审查，限域间距、H₂ 比、源量与温度等关键参数待核查。",
+      "difference": "以限域传质和还原性气氛主动调相，并把生长相与晶体对称性的光学后果联系起来。",
+      "sourceAccess": "出版商摘要与发表历史；未读完整补充材料",
+      "sources": [
+        {
+          "label": "原始研究来源",
+          "url": "https://chemistry-europe.onlinelibrary.wiley.com/doi/full/10.1002/chem.201803634"
+        },
+        {
+          "label": "开放版本／发表记录",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/30028045/"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "可用电偶极选择定则理解晶体对称性如何反映在光学信号中。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ],
+      "evidence": "地面实验"
+    },
+    {
+      "id": "chang-2018-monolayer",
+      "title": "Synthesis of Large-Area InSe Monolayers by Chemical Vapor Deposition",
+      "titleZh": "CVD 制备大面积 InSe 单层薄膜",
+      "date": "2018-08-28",
+      "dateNote": "Wiley 首次发表日期",
+      "publicationType": "peer-reviewed",
+      "journal": "Small 14(39), 1802351",
+      "doi": "10.1002/smll.201802351",
+      "url": "https://doi.org/10.1002/smll.201802351",
+      "materials": [
+        "InSe"
+      ],
+      "method": "CVD",
+      "topics": [
+        "气相生长",
+        "单层薄膜",
+        "器件性能",
+        "氧化稳定性"
+      ],
+      "question": "能否用 CVD 获得可转移的大面积 InSe 单层？",
+      "design": "在 CVD 中气相硒化 In₂O₃，并用光谱、显微表征与离子凝胶栅 FET 检查薄膜。",
+      "mechanism": "硒化反应形成 InSe 原子层；石墨烯覆盖可减缓环境氧化。",
+      "metrics": [
+        {
+          "label": "已核查结果",
+          "value": "以单层为主的连续膜约 1 × 1 cm²；室温离子凝胶栅 FET 迁移率最高约 30 cm² V⁻¹ s⁻¹，开关比 >10⁴。",
+          "conditions": "离子凝胶栅器件；不可与不同栅介质、厚度和提取方法的数值直接排序。"
+        }
+      ],
+      "limitations": "以单层为主不等于全域严格单层；完整晶界统计和长期稳定性本卡未核实。",
+      "reproducibility": "已核实 In₂O₃ 气相硒化路线；补充材料未读，温度、源量、流量、时间等配方待核查。",
+      "difference": "从少量剥离薄片走向厘米尺度连续膜，并展示可转移及石墨烯保护策略。",
+      "sourceAccess": "出版商摘要；补充信息存在但未审查",
+      "sources": [
+        {
+          "label": "原始研究来源",
+          "url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/smll.201802351"
+        }
+      ],
+      "tags": [
+        "地面实验"
+      ],
+      "featured": false,
+      "readingReason": "连接单层生长、氧化保护与晶体管测试的经典入门案例。",
+      "readingGuide": [
+        "先找研究变量与对照，明确研究的是薄膜还是块体。",
+        "再查看结构、光谱或器件证据，判断哪些结果是直接观测。",
+        "最后核对测量条件、误差与复现缺口，避免跨方法比较数值。"
+      ],
+      "evidence": "地面实验"
+    }
+  ],
+  "issues": [
+    {
+      "id": "weekly-2026-11-13",
+      "title": "创刊号 · 建立 InSe 研究坐标",
+      "start": "2026-11-07",
+      "end": "2026-11-13",
+      "checkedAt": "2026-11-13",
+      "status": "no-major-progress",
+      "summary": "本期无重大进展（在本次已核查来源范围内）。未确认本周出现符合收录标准的新成果。建站首期回溯整理9篇研究，推荐低温MOCVD与空间／地面对照两篇精读；它们并非本周新发表论文。",
+      "recommended": [
+        "gunkel-2026-mocvd",
+        "space-inse-2026"
+      ],
+      "newPaperIds": [],
+      "searchScope": "选择性首轮核查：2026-11-07—11-13的新动态，并回溯2018—2026年InSe气相生长、结构缺陷与微重力原始研究。检查出版商、arXiv及可读作者稿；不是穷尽数据库检索。",
+      "searchLog": [
+        {
+          "query": "InSe CVD MOCVD thin flakes 2026 2025 vapor deposition microgravity growth",
+          "url": "https://arxiv.org/search/?query=InSe&searchtype=all&order=-announced_date_first",
+          "result": "定位低温MOCVD及晶圆生长的原始论文，并检查其期刊发表状态。"
+        },
+        {
+          "query": "InSe MOCVD CVD November 2026; InSe CVD growth November 7 13 2026 paper",
+          "url": "https://search.crossref.org/?q=InSe%20MOCVD%20CVD",
+          "result": "未核实本周新原始研究；搜索出现旧论文、会议及其他材料，未计为InSe新进展。"
+        },
+        {
+          "query": "InSe crystal growth microgravity space station ground 2026",
+          "url": "https://www.nature.com/articles/s41467-026-70520-1",
+          "result": "核实2026年3月的空间站Bridgman实验，不是本周发表，也不是CVD。"
+        },
+        {
+          "query": "InSe defects oxidation STEM Raman selenium vacancy",
+          "url": "https://pubs.rsc.org/en/content/articlehtml/2023/ra/d3ra00324h",
+          "result": "核查表征扰动和缺陷氧化基础研究，保留方法访问深度。"
+        }
+      ],
+      "limitations": "本期结论仅覆盖本次已核查来源；部分正文或补充材料访问受限，索引可能延迟。未读完整方法的卡片明确标注，不能据此直接独立复现实验。首期未收录仍未发表的独立预印本，已有期刊版本的工作只保留一张卡。"
+    }
+  ],
+  "meta": {
+    "updatedAt": "2026-11-13",
+    "coverageStart": "2018-01-01",
+    "scope": "InSe 气相生长 · 结构与缺陷 · 空间／地面对照",
+    "evidenceNotes": [
+      "已发现并核查2026年空间/地面InSe直接对照，不能写成整个InSe领域尚无空间制造证据。",
+      "该直接对照采用Bridgman块体生长后剥离；本轮检索未核实空间/地面InSe CVD直接对照，不能将块体结论等同CVD薄片结论。",
+      "2023年Materials Letters地面空间站模拟炉论文 DOI 10.1016/j.matlet.2023.133970 是地面预研：715°C、约30°C/cm、γ相R3m、腐蚀坑密度约10⁴ cm⁻²；它不是微重力实验。来源：https://www.sciencedirect.com/science/article/abs/pii/S0167577X23001556。",
+      "以上为选择性首轮文献核查，不是穷尽检索，也未据此断言2026-11某周绝无新论文。"
+    ],
+    "cadence": "本部署自动更新尚未连接",
+    "scheduleStatus": "本部署自动更新尚未连接；资料截至 2026-11-13",
+    "hostingMode": "static-public",
+    "snapshotGeneratedAt": "2026-11-16T03:33:45.789Z",
+    "snapshotStatus": "已从 latest-data.json 导出"
+  },
+  "storage": "static"
+}
