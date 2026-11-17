@@ -68,6 +68,97 @@
       ]
     },
     {
+      "id": "adma-2025-space",
+      "title": "Expanded InSe Crystal Structure with Reduced Intrinsic Defects for High-Performance Field-Effect Transistors",
+      "titleZh": "空间站生长 InSe 的晶格膨胀、缺陷减少与高性能场效应晶体管",
+      "date": "2025-10-14",
+      "dateNote": "出版商首次在线发表 2025-10-14；纸本卷期为 Advanced Materials 38, e06506（卷期目录年份未逐项核实），不构成另一篇论文。本卡为 2026-11-17 核查补录，不是本周新发表。",
+      "publicationType": "peer-reviewed",
+      "journal": "Advanced Materials 38, e06506",
+      "doi": "10.1002/adma.202506506",
+      "url": "https://doi.org/10.1002/adma.202506506",
+      "materials": [
+        "InSe",
+        "γ-InSe"
+      ],
+      "method": "空间站熔体法块体生长（器件由该晶体制备）",
+      "topics": [
+        "空间微重力",
+        "空间与地面对照",
+        "晶体结构",
+        "本征缺陷",
+        "场效应晶体管"
+      ],
+      "question": "微重力熔体生长能否减少 InSe 的本征缺陷、改变晶格，并据此提升场效应晶体管性能？",
+      "design": "在中国空间站微重力条件下熔体生长 InSe 晶体，与地面生长样品对照；用球差校正透射电镜比较晶格，用密度泛函理论计算缺陷形成能，并由空间晶体与地面晶体制备背栅 FET，比较电学与光电性能。对照样品数量、器件制备流程与测试条件未逐项核实。",
+      "mechanism": "作者将空间样品的面内 1.29%、层间 3.65% 晶格膨胀，与更窄带隙、更小电子有效质量、更大缺陷形成能和费米能级附近更多电子态联系起来，解释载流子散射减弱与输运改善。晶格数值为电镜观察；带隙、有效质量与缺陷形成能来自 DFT 计算，属作者解释而非直接测量。",
+      "metrics": [
+        {
+          "label": "面内/层间晶格膨胀",
+          "value": "1.29%（a,b 面内）/ 3.65%（c 轴）",
+          "conditions": "球差校正 TEM 对空间与地面样品的比较；测量误差、统计样本数与参照晶面未核实。"
+        },
+        {
+          "label": "开态电流 Ion",
+          "value": "6.0 µA µm⁻¹",
+          "conditions": "背栅 InSe FET；沟道厚度、栅介质、漏源偏压与归一化方式未核实。"
+        },
+        {
+          "label": "开关比",
+          "value": "10⁸",
+          "conditions": "同上器件；取自摘要，栅压扫描范围与关态定义未核实。"
+        },
+        {
+          "label": "回滞电压",
+          "value": "0.6 V",
+          "conditions": "同上器件；扫描速率、范围与气氛未核实。"
+        },
+        {
+          "label": "光响应度",
+          "value": "5316 A W⁻¹",
+          "conditions": "空间 InSe 器件的光电测试；波长、光功率密度、偏压与有效沟道面积未核实。"
+        },
+        {
+          "label": "比探测率",
+          "value": "1.38 × 10¹² Jones",
+          "conditions": "同上光电测试；噪声带宽与计算方式未核实。"
+        },
+        {
+          "label": "场效应迁移率",
+          "value": "2250 cm² V⁻¹ s⁻¹（来源为高校新闻稿，未在可访问的论文摘要中核实）",
+          "conditions": "新闻稿称约为地面样品的 4 倍以上；提取方法（是否跨导法）、温度、介质电容与接触校正未核实，不能与其他器件的场效应或 THz 模型迁移率直接排名。"
+        }
+      ],
+      "limitations": "这是空间站块体熔体生长后制备器件的对照，不是空间 CVD／气相沉积薄片实验，不能直接外推到衬底直接生长。出版商正文与补充材料未能取得：器件是否由机械剥离薄片制备、沟道厚度、测试环境、迁移率提取公式均未核实。迁移率数值来自机构新闻稿而非论文摘要。与 2026 年 Nature Communications 的空间对照是否同批样品、同一装置或同一测量批次，未核实，不能假设为独立重复实验。",
+      "reproducibility": "已核实：在中国空间站微重力环境熔体生长 InSe 块体，并以该晶体制备背栅 FET（据摘要与机构新闻稿）。未核实：原料配比与纯度、坩埚/安瓿形式、温场与降温速率、在轨时长、晶体剥离与转移步骤、栅介质与电极工艺、光电测试波长与功率。以上缺口不补造。",
+      "difference": "与已收录的 2026 年 Nature Communications 空间/地面对照相比，本工作把重点放在晶格膨胀与本征缺陷形成能，并报告 FET 电学与光电指标；两者都是块体生长后制器件，可互为旁证，但不能互相替代，也都不能代表 CVD 薄片。",
+      "sourceAccess": "已核查 PubMed/Europe PMC 摘要、Wiley 元数据（首次在线日期 2025-10-14、文章号 e06506）、山东大学新闻稿与院系报道；出版商全文与补充材料返回 403，未取得。方法与测试条件按“未核实”保留。",
+      "sources": [
+        {
+          "label": "出版商 DOI（摘要与元数据）",
+          "url": "https://doi.org/10.1002/adma.202506506"
+        },
+        {
+          "label": "PubMed 摘要",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/41085155/"
+        },
+        {
+          "label": "山东大学新闻稿（二手来源，含迁移率数字）",
+          "url": "https://www.view.sdu.edu.cn/info/1101/207429.htm"
+        }
+      ],
+      "tags": [
+        "空间／地面直接对照",
+        "块体生长"
+      ],
+      "readingReason": "值得精读：这是第二条独立的中国空间站 InSe 空间/地面直接对照，可与已收录的 2026 年 Nature Communications 一文并读，练习区分直接测量、DFT 解释，以及“块体证据”向“CVD 薄片”外推的边界。",
+      "readingGuide": [
+        "先看空间与地面晶体的生长与取样方式，确认是否为同参数对照、样品形态是否一致。",
+        "再看球差校正 TEM 的晶格膨胀证据与 DFT 缺陷形成能：区分直接观察、计算结果与作者机制解释。",
+        "最后核对 FET 与光电指标对应的沟道厚度、介质、偏压与光功率，并留意迁移率数字的出处是新闻稿而非摘要。"
+      ]
+    },
+    {
       "id": "gunkel-2026-mocvd",
       "title": "Low Temperature MOCVD Synthesis of High-Mobility 2D InSe",
       "titleZh": "低温 MOCVD 生长高迁移率二维 InSe",
@@ -528,6 +619,74 @@
   ],
   "issues": [
     {
+      "id": "weekly-2026-11-17",
+      "title": "空间对照补录 · 本期未见新原始研究",
+      "start": "2026-11-11",
+      "end": "2026-11-17",
+      "checkedAt": "2026-11-17",
+      "status": "no-major-progress",
+      "summary": "本期无重大进展（在本次已核查来源范围内）。2026-11-11—11-17 未核实到符合收录标准的 InSe 气相生长或结构／缺陷新原始研究；窗口内新条目为 In₂Se₃ 计算与器件类工作，按材料与主题区分未计入。推荐回溯精读：本次补录的 2025-10-14 空间站 InSe 块体生长对照，以及已收录的 2026 年 Nature Communications 对照；两者都不是空间 CVD 薄片实验。",
+      "recommended": [
+        "adma-2025-space",
+        "space-inse-2026"
+      ],
+      "newPaperIds": [],
+      "searchScope": "本期核查 2026-11-11—2026-11-17（北京时间，含首尾），并补查上期（2026-11-13）之后的索引延迟。来源：arXiv 检索页与 API、Europe PMC、ScienceDirect 期刊 RSS（Journal of Crystal Growth、Materials Letters、Journal of Alloys and Compounds、Applied Surface Science）、2D Materials、npj 2D Materials and Applications、Nature Communications 最新目录、APS 接收列表，以及出版商／机构页面检索。Crossref、Semantic Scholar、OpenAlex 多次限流，未完成全库日期过滤检索。",
+      "searchLog": [
+        {
+          "query": "InSe（arXiv 全字段，按公告日期倒序）",
+          "url": "https://arxiv.org/search/?query=InSe&searchtype=all&order=-announced_date_first",
+          "result": "最新 InSe 预印本为 2026-10-25 提交；2026-11-11—11-17 无 InSe 新预印本。窗口内仅见 α-In₂Se₃ 缺陷第一性原理计算，按材料区分未计入。"
+        },
+        {
+          "query": "InSe AND submittedDate:[202611100000 TO 202611180000]（arXiv API）",
+          "url": "http://export.arxiv.org/api/query?search_query=InSe+AND+submittedDate:%5B202611100000+TO+202611180000%5D",
+          "result": "totalResults = 0；同一窗口的 \"indium selenide\" 短语检索亦为 0。"
+        },
+        {
+          "query": "(TITLE_ABS:\"InSe\" OR \"indium selenide\") AND FIRST_PDATE:[2026-11-01 TO 2026-11-18]",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+          "result": "仅 1 条：2026-11-04 的 InSe 光电探测综述（10.1021/acsami.6c14015），属综述而非原始生长研究；窗口内无新条目。"
+        },
+        {
+          "query": "Journal of Crystal Growth 最新目录（RSS）",
+          "url": "https://rss.sciencedirect.com/publication/science/00220248",
+          "result": "最新 25 条中无 InSe／铟硒条目；feed 构建时间 2026-11-16。"
+        },
+        {
+          "query": "Materials Letters / Journal of Alloys and Compounds / Applied Surface Science 最新目录（RSS）",
+          "url": "https://rss.sciencedirect.com/publication/science/0167577X",
+          "result": "三刊各取最新 100 条，未出现 InSe／indium selenide 条目；构建时间 2026-11-16。"
+        },
+        {
+          "query": "2D Materials、npj 2D Materials and Applications、Nature Communications 最新目录",
+          "url": "https://iopscience.iop.org/journal/rss/2053-1583",
+          "result": "三刊最新目录（10/8/8 条）无 InSe 条目；Nature Communications RSS 仅含最新 8 条，覆盖有限。"
+        },
+        {
+          "query": "APS Physical Review B 接收列表（In₂Se₃）",
+          "url": "https://journals.aps.org/prb/accepted/10.1103/7f4l-43y2",
+          "result": "2026-11-13 接收的 In₂Se₃ 多型晶格动力学论文。材料为 In₂Se₃，按规则未计入 InSe，也未建立卡片。"
+        },
+        {
+          "query": "空间/地面 InSe 对照补查（DOI + PubMed + 机构稿）",
+          "url": "https://doi.org/10.1002/adma.202506506",
+          "result": "核实 2025-10-14 在线发表的中国空间站 InSe 块体生长与 FET 工作（10.1002/adma.202506506），补录一张卡；它不是本周新发表，不改变本期状态。"
+        },
+        {
+          "query": "Crossref / OpenAlex / Semantic Scholar / ChemRxiv 日期过滤检索",
+          "url": "https://api.crossref.org/works",
+          "result": "Crossref 与 Semantic Scholar 多次返回 429，OpenAlex 返回预算限制 403，ChemRxiv 返回 403；未取得全库日期过滤结果，已记入本期局限。"
+        },
+        {
+          "query": "人工晶体学报 / 无机材料学报 当期目录",
+          "url": "http://rgjtxb.jtxb.cn/CN/1000-985X/home.shtml",
+          "result": "站点返回空响应，未能核对当期中文目录；可能存在未覆盖条目，已记入局限。"
+        }
+      ],
+      "limitations": "选择性核查，不是穷尽检索。Crossref、Semantic Scholar、OpenAlex 在本时段多次限流，未能对全库执行完整日期过滤；Wiley 与 ACS 的正文／目录页返回 403，部分判断只能依据摘要、机构新闻稿与 RSS 目录。新补录卡的正文与补充材料未取得，生长参数、器件制备与光电测试条件未核实，卡片中已逐项标注。中文期刊站点访问不完整。检索受阻不等于领域没有进展。"
+    },
+    {
       "id": "weekly-2026-11-13",
       "title": "创刊号 · 建立 InSe 研究坐标",
       "start": "2026-11-07",
@@ -567,20 +726,21 @@
     }
   ],
   "meta": {
-    "updatedAt": "2026-11-13",
+    "updatedAt": "2026-11-17",
     "coverageStart": "2018-01-01",
     "scope": "InSe 气相生长 · 结构与缺陷 · 空间／地面对照",
     "evidenceNotes": [
       "已发现并核查2026年空间/地面InSe直接对照，不能写成整个InSe领域尚无空间制造证据。",
+      "已核查第二条独立的中国空间站 InSe 空间/地面直接对照（Advanced Materials 38, e06506，2025-10-14 在线；DOI 10.1002/adma.202506506）：块体熔体生长＋背栅 FET，报告面内 1.29%、层间 3.65% 晶格膨胀与缺陷形成能升高。它同样是块体证据，不是空间 CVD 薄片实验。",
       "该直接对照采用Bridgman块体生长后剥离；本轮检索未核实空间/地面InSe CVD直接对照，不能将块体结论等同CVD薄片结论。",
       "2023年Materials Letters地面空间站模拟炉论文 DOI 10.1016/j.matlet.2023.133970 是地面预研：715°C、约30°C/cm、γ相R3m、腐蚀坑密度约10⁴ cm⁻²；它不是微重力实验。来源：https://www.sciencedirect.com/science/article/abs/pii/S0167577X23001556。",
       "以上为选择性首轮文献核查，不是穷尽检索，也未据此断言2026-11某周绝无新论文。"
     ],
     "cadence": "本部署自动更新尚未连接",
-    "scheduleStatus": "本部署自动更新尚未连接；资料截至 2026-11-13",
+    "scheduleStatus": "本部署自动更新尚未连接；资料截至 2026-11-17",
     "hostingMode": "static-public",
-    "snapshotGeneratedAt": "2026-11-16T03:33:45.789Z",
-    "snapshotStatus": "已从 latest-data.json 导出"
+    "snapshotGeneratedAt": "2026-11-17T08:20:00.000Z",
+    "snapshotStatus": "2026-11-17 由核查流程直接更新 data.json（未使用归档导出包）"
   },
   "storage": "static"
 }
